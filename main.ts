@@ -266,19 +266,19 @@ export default class uuhimsyPlugin extends Plugin {
 						const sceneName = scene.sceneName.split("|||");
 						
 						let fileName = `Entrance Scene - ${sceneName[1]}`;
-						let existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+						let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						if (!existing) {
-							await this.app.vault.create(`_templates/${fileName}.md`, 
+							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 								`<!-- slide data-scene-entrance="${sceneName[1]}" --> `,
 							);		
 						}
 
 						fileName = `Exit Scene - ${sceneName[1]}`;
-						existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+						existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						console.log(fileName)
 						console.log("existing",existing)
 						if (!existing) {
-							await this.app.vault.create(`_templates/${fileName}.md`, 
+							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 								`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
 							);
 						}
@@ -291,17 +291,17 @@ export default class uuhimsyPlugin extends Plugin {
 				cameraSources.sceneItems.forEach(async(source, index) => {
 				
 					let fileName = `Entrance Camera - ${source.sourceName}`;
-					let existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+					let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 					if (!existing) {
-						await this.app.vault.create(`_templates/${fileName}.md`, 
+						await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 							`<!-- slide data-camera-entrance="${source.sourceName}" --> `,
 						);		
 					}
 					
 					fileName = `Exit Camera - ${source.sourceName}`;
-					existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+					existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 					if (!existing) {
-						await this.app.vault.create(`_templates/${fileName}.md`, 
+						await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 							`<!-- slide data-camera-exit="${source.sourceName}" --> `,
 							);		
 					}
@@ -501,19 +501,19 @@ this.addCommand({
 				Object.entries(shortcuts).forEach(async([key, shortcut]) => {
 				//shortcuts.foreach(async (shortcut, index) => {
 					let fileName = `Entrance Shortcuts - ${shortcut}.md`;
-						let existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+						let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						if (!existing) {
-							await this.app.vault.create(`_templates/${fileName}`, 
+							await this.app.vault.create(`_slide_Tags/${fileName}`, 
 								`<!-- slide data-shortcut-entrance="${shortcut}" --> `,
 							);		
 						}
 
 						fileName = `Exit Shortcuts - ${shortcut}.md`;
-						existing = await this.app.vault.adapter.exists(normalizePath(`_templates/${fileName}`));
+						existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						console.log(fileName)
 						console.log("existing",existing)
 						if (!existing) {
-							await this.app.vault.create(`_templates/${fileName}`, 
+							await this.app.vault.create(`_slide_Tags/${fileName}`, 
 								`<!-- slide data-shortcut-exit="${shortcut}" --> `,
 							);
 						}
