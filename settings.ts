@@ -1,5 +1,5 @@
 import uuhimsyPlugin from "main";
-import {App, PluginSettingTab, Setting } from "obsidian";
+import {App, PluginSettingTab, Setting, normalizePath } from "obsidian";
 
 export class uuhimsySettingsTab extends PluginSettingTab {
     plugin: uuhimsyPlugin;
@@ -8,7 +8,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         super(app,plugin);
         this.plugin = plugin;
     }
-
+    
     display(){
         let { containerEl } = this;
         containerEl.empty();
@@ -26,7 +26,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 (value) => {
                     this.plugin.settings.websocketIP_Text = value;
                     this.plugin.saveSettings()
-                    this.app.vault.getMarkdownFiles
+                    refresh_websocketDetailsJS(this)
              })
         });
 
@@ -37,6 +37,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 (value) => {
                     this.plugin.settings.websocketPort_Text = value;
                     this.plugin.saveSettings()
+                    refresh_websocketDetailsJS(this)
              })
         });
 
@@ -47,6 +48,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 (value) => {
                     this.plugin.settings.websocketPW_Text = value;
                     this.plugin.saveSettings()
+                    refresh_websocketDetailsJS(this)
              })
         });
 
@@ -82,9 +84,37 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 (value) => {
                     this.plugin.settings.oscOutPort_Text = value;
                     this.plugin.saveSettings()
+                    
              })
         });
 
+        async function refresh_websocketDetailsJS(obsidian){
+            const fileName = `_browser_Sources/obs_webSocket_details/websocketDetails.js`;
+            const existing = await obsidian.app.vault.adapter.exists(normalizePath(`${fileName}`));
+            console.log(existing)
+            console.log(obsidian.plugin.settings.websocketIP_Text)
+            if (!existing) {
+                await obsidian.app.vault.create(`${fileName}`, 
+                    `var wssDetails = {
+    "IP":"${obsidian.plugin.settings.websocketIP_Text}",
+    "PORT":"${obsidian.plugin.settings.websocketPort_Text}",
+    "PW":"${obsidian.plugin.settings.websocketPW_Text}"
+};`,);
+            } else{
+                await obsidian.app.vault.delete(obsidian.app.vault.getFileByPath(fileName));
+                await obsidian.app.vault.create(`${fileName}`, 
+                    `var wssDetails = {
+    "IP":"${obsidian.plugin.settings.websocketIP_Text}",
+    "PORT":"${obsidian.plugin.settings.websocketPort_Text}",
+    "PW":"${obsidian.plugin.settings.websocketPW_Text}"
+};`,);      
+            }
+        }
     }
 
 }
+
+
+// var websocketIP = this.settings.websocketIP_Text;
+// var websocketPort = this.settings.websocketPort_Text;
+// var websocketPassword = this.settings.websocketPW_Text;
