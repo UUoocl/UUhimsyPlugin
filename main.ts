@@ -2,6 +2,8 @@ import { Notice, Plugin, normalizePath, DataAdapter } from 'obsidian';
 import { uuhimsySettingsTab } from 'settings';
 import { UUhimsyEntranceSuggest, UUhimsyExitSuggest } from 'suggest';
 
+//include system command 
+const { execSync } = require('child_process');
 
 // pathToPlugin contains "my-folder/file" not "//my-folder\"
 
@@ -12,6 +14,11 @@ interface uuhimsyPluginSettings{
 	websocketIP_Text: string;
 	websocketPort_Text: string;
 	websocketPW_Text: string;
+	obsAppName_Text: string;
+	obsAppPath_Text: string;
+	obsCollection_Text: string;
+	obsDebug_Text: string;
+	obsDebugPort_Text: string;
 	oscIP_Text: string;
 	oscInPort_Text: string;
 	oscOutPort_Text: string;
@@ -23,7 +30,12 @@ const DEFAULT_SETTINGS: Partial<uuhimsyPluginSettings> = {
 	websocketPW_Text: "password",
 	oscIP_Text: "localhost",
 	oscInPort_Text: "4466",
-	oscOutPort_Text: "4477"
+	oscOutPort_Text: "4477",
+	obsAppName_Text: "OBS",
+	obsAppPath_Text: "C:\\\\Program Files\\\\obs-studio\\\\bin\\\\64bit\\\\",
+	obsCollection_Text: "Key_and_Mouse_Visuals_Collection",  
+	obsDebug_Text: "Y",
+	obsDebugPort_Text: "9222"
 };
 
 export default class uuhimsyPlugin extends Plugin {
@@ -40,18 +52,17 @@ export default class uuhimsyPlugin extends Plugin {
 	async saveSettings(){
 		this.saveData(this.settings);
 	}
-	
-	
-	
-	
+		
 	async onload() {
 
 		await this.loadSettings();
+		
 		
 		this.addSettingTab(new uuhimsySettingsTab(this.app, this))
 		
 		new Notice("Enabled OSC plugin")	
 		new Notice(this.settings.websocketIP_Text)	
+		new Notice(this.app.vault.configDir)
 			 
 //
 //
@@ -62,7 +73,7 @@ export default class uuhimsyPlugin extends Plugin {
 //		
 		this.addCommand({
 			id: 'start-osc-to-websocket',
-			name: 'UUhimsy Start OSC to OBS Websocket connection',
+			name: 'Start OSC to OBS Websocket connection',
 			callback:() => {
 			//this.addRibbonIcon("activity","start OSC to Websocket", () =>{
 			new Notice("Starting OSC Server")
@@ -217,10 +228,10 @@ export default class uuhimsyPlugin extends Plugin {
 //	2. Add tags to slides
 //
 		this.addCommand({
-			id: 'uuhimsy-get-obs-scene-tags',
-			name: 'UUhimsy get OBS Scene tags',
+			id: 'get-obs-scene-tags',
+			name: 'Get OBS Scene tags',
 			callback: async() => {
-		//this.addRibbonIcon("image-down","get OBS Scene Options", async () =>{
+		 //this.addRibbonIcon("image-down","get OBS Scene Options", async () =>{
 			new Notice("Get OBS Scenes")
 			var websocketIP = this.settings.websocketIP_Text;
 			var websocketPort = this.settings.websocketPort_Text;
@@ -281,6 +292,7 @@ export default class uuhimsyPlugin extends Plugin {
 							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 								`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
 							);
+							
 						}
 					}	
 				});
@@ -306,7 +318,7 @@ export default class uuhimsyPlugin extends Plugin {
 							);		
 					}
 				});
-//End of get scene function
+             //End of get scene function
 			}})
 
 			// this.addRibbonIcon("scroll", "entrance tag", () => {
@@ -314,16 +326,16 @@ export default class uuhimsyPlugin extends Plugin {
 			// })
 
 			this.addCommand({
-				id: 'uuhimsy-insert-entrance-tag',
-				name: 'UUhimsy insert entrance tag',
+				id: 'insert-entrance-tag',
+				name: 'Insert slide entrance tag',
 				editorCallback: (editor: Editor, view: MarkdownView) => {
 					new UUhimsyEntranceSuggest(this.app).open();
 				}
 			});
 
 			this.addCommand({
-				id: 'uuhimsy-insert-exit-tag',
-				name: 'UUhimsy insert exit tag',
+				id: 'insert-exit-tag',
+				name: 'Insert slide exit tag',
 				editorCallback: (editor: Editor, view: MarkdownView) => {
 					new UUhimsyExitSuggest(this.app).open();
 				}
@@ -339,8 +351,8 @@ export default class uuhimsyPlugin extends Plugin {
 //	Send a PTZ camera position message every second
 		
 			this.addCommand({
-				id: 'uuhimsy-send-camera-position-to-obs',
-				name: 'UUhimsy send camera position to obs',
+				id: 'send-camera-position-to-obs',
+				name: 'Start sending camera PTZ position to OBS',
 				checkCallback: async(checking) => {
 					let isMac = process.platform === 'darwin';
 					if (isMac){
@@ -383,7 +395,8 @@ export default class uuhimsyPlugin extends Plugin {
 
 			//https://forum.obsidian.md/t/how-to-get-vault-absolute-path/22965
 			//@ts-ignore
-			const vaultPath = normalizePath(`${this.app.vault.adapter.basePath}/.obsidian/plugins/UUhimsyPlugin`)
+///////////make vaultPath an onLoad global variable
+			const vaultPath = normalizePath(`${this.app.vault.adapter.basePath}/${this.app.vault.configDir}/plugins/UUhimsyPlugin`)
 			const util = require('util');
 			const exec = util.promisify(require('child_process').exec);
 			let previousPTZ ="";
@@ -445,12 +458,21 @@ export default class uuhimsyPlugin extends Plugin {
 				}
 			  }
 			
+			  obs.on("CustomEvent", async function (event){
+				
+				console.log("Message from OBS",event);
+				if (event.event_name === "set-ptz") {
+					console.log('command',`'shortcuts' run ${event.shortcut_name}`)
+					const stdout =  await exec(`'${vaultPath}/uvc-util' -I 0 -o pan-tilt-abs`);
+					console.log(stdout)
+				}
+			  })
 
-						//end checking 
-						}
-						return true;
-					}
-					return false;
+				//end checking 
+				}
+				return true;
+				}
+				return false;
 				}
 			//end get PTZ command	
 			});
@@ -458,8 +480,8 @@ export default class uuhimsyPlugin extends Plugin {
 
 	//stop sending camera position		
 	this.addCommand({
-		id: 'uuhimsy-stop-camera-position-to-obs',
-		name: 'UUhimsy stop sending camera position to obs',
+		id: 'stop-camera-position-to-obs',
+		name: 'Stop sending camera PTZ position to OBS',
 		callback:() =>{
 			// Set a fake timeout to get the highest timeout id
 			var highestTimeoutId = setTimeout(";");
@@ -482,8 +504,8 @@ export default class uuhimsyPlugin extends Plugin {
 
 //COMMAND: Get list of Shortcut tags
 this.addCommand({
-	id: 'uuhimsy-get-shortcuts-tags',
-	name: 'UUhimsy get Shortcuts tags',
+	id: 'get-shortcuts-tags',
+	name: 'Get Apple Shortcuts tags',
 	checkCallback: async(checking) => {
 		let isMac = process.platform === 'darwin';
 		if (isMac){
@@ -526,8 +548,8 @@ this.addCommand({
 
 //LISTEN for Shortcut Request
 this.addCommand({
-	id: 'uuhimsy-run-shortcut',
-	name: 'UUhimsy run Shortcut',
+	id: 'run-apple-shortcut',
+	name: 'Run Apple Shortcut',
 	callback: async() => {
 		
 		
@@ -561,24 +583,69 @@ this.addCommand({
 		});
 		console.log(`ws://${websocketIP}:${websocketPort}`);
 		
-		//include system command 
-		const { execSync } = require('child_process');
+
 		//listen for Shortcut Request
-		obs.on("CustomEvent", async function (event) {
+		obs.on("CustomEvent", async function (event){
 			console.log("Message from OBS",event);
 			if (event.event_name === "run-shortcut") {
 				console.log('command',`'shortcuts' run ${event.shortcut_name}`)
 				const stdout =  execSync(`'shortcuts' run ${event.shortcut_name}`,{encoding: 'utf8',});
-				//let stdout = execSync('ls');
 				console.log(stdout)
 				//console.log(stderr)
 				//If Shortcut returns a result, then call OBS
-
-	}
-})
+			}
+		})
 	}})
 
 // #endregion
+
+
+// 
+//
+//		
+// #region Open OBS feature
+//  Only show this command to macOS users
+//
+//	Execute a command line to Open OBS
+
+		this.addCommand({
+			id: 'open-obs',
+			name: 'Open OBS',
+			callback: async () => {
+				const util = require('util');
+				const exec = util.promisify(require('child_process').exec);
+				//build command string
+				
+				let commandString ="hello"
+				if (process.platform === 'darwin') {
+					commandString = `open -n -a "${this.settings.obsAppName_Text}"`;
+					commandString += ` --args --collection "${this.settings.obsCollection_Text}"`;
+					commandString += ` --remote-debugging-port=${this.settings.obsDebugPort_Text}`;
+					commandString += ` --remote-allow-origins=http://localhost:${this.settings.obsDebugPort_Text}`;
+					commandString += ` --websocket_port "${this.settings.websocketPort_Text}"`;
+					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
+					commandString += ` --multi`;
+					exec(commandString);
+				}
+				if (process.platform === 'win32') {
+					commandString = `"${this.settings.obsAppPath_Text}${this.settings.obsAppName_Text}"`;
+					commandString += ` --args --collection "${this.settings.obsCollection_Text}"`;
+					commandString += ` --remote-debugging-port=${this.settings.obsDebugPort_Text}`;
+					commandString += ` --remote-allow-origins=http://localhost:${this.settings.obsDebugPort_Text}`;
+					commandString += ` --websocket_port "${this.settings.websocketPort_Text}"`;
+					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
+					commandString += ` --multi`;
+					exec(commandString);
+				}
+				console.log(commandString)
+
+				}
+			}
+		)
+
+// #endregion
+
+
 
 // 
 //

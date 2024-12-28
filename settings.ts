@@ -16,7 +16,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         new Setting(containerEl)
         .setName("OBS WebSocket Server Settings")
         .setHeading()
-        .setDesc("Copy the Websocket Server Settings from OBS")
+        .setDesc("Set the OBS Websocket Server Settings")
         
         new Setting(containerEl)
         .setName("OBS WebSocket Server IP")
@@ -50,6 +50,68 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                     this.plugin.saveSettings()
                     refresh_websocketDetailsJS(this)
              })
+        });
+
+        new Setting(containerEl)
+        .setName("Open OBS")
+        .setHeading()
+        .setDesc("Open OBS with these options.")
+        
+        if(process.platform === "darwin"){
+            new Setting(containerEl)
+            .setName("OBS app Name")
+            .setDesc("Enter 'OBS' or a custom name")
+            .addText((item) => {
+                item.setValue(this.plugin.settings.obsAppName_Text).onChange(
+                    (value) => {
+                        this.plugin.settings.obsAppName_Text = value;
+                        this.plugin.saveSettings()
+                    })
+                });
+            }
+        
+        if(process.platform === "win32"){
+            new Setting(containerEl)
+            .setName("OBS app Name")
+            .setDesc("Enter 'OBS' or a custom name")
+            .addText((item) => {
+                item.setValue(this.plugin.settings.obsAppName_Text).onChange(
+                    (value) => {
+                        this.plugin.settings.obsAppName_Text = value;
+                        this.plugin.saveSettings()
+                    })
+                });
+
+            new Setting(containerEl)
+            .setName("Path to OBS app")
+            .addText((item) => {
+                item.setValue(this.plugin.settings.obsAppPath_Text).onChange(
+                    (value) => {
+                        this.plugin.settings.obsAppPath_Text = value;
+                        this.plugin.saveSettings()
+                    })
+                });
+            }
+
+        new Setting(containerEl)
+        .setName("OBS Collection")
+        .addText((item) => {
+            item.setValue(this.plugin.settings.obsCollection_Text).onChange(
+                (value) => {
+                    this.plugin.settings.obsCollection_Text = value;
+                    this.plugin.saveSettings()
+            })
+        });
+
+        new Setting(containerEl)
+        .setName("OBS Debug Port")
+        .setDesc("Enter a Port for the Remote Debugger, or leave blank to skip this option")
+        .addText((item) => {
+            item.setValue(this.plugin.settings.obsDebugPort_Text).onChange(
+                (value) => {
+                    this.plugin.settings.obsDebugPort_Text = value;
+                    this.plugin.saveSettings()
+            })
         });
 
         new Setting(containerEl)
@@ -91,8 +153,6 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         async function refresh_websocketDetailsJS(obsidian){
             const fileName = `_browser_Sources/obs_webSocket_details/websocketDetails.js`;
             const existing = await obsidian.app.vault.adapter.exists(normalizePath(`${fileName}`));
-            console.log(existing)
-            console.log(obsidian.plugin.settings.websocketIP_Text)
             if (!existing) {
                 await obsidian.app.vault.create(`${fileName}`, 
                     `var wssDetails = {
