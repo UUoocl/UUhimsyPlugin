@@ -14,12 +14,12 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         containerEl.empty();
 
         new Setting(containerEl)
-        .setName("OBS WebSocket Server Settings")
+        .setName("OBS WebSocket Server")
         .setHeading()
         .setDesc("Set the OBS Websocket Server Settings")
         
         new Setting(containerEl)
-        .setName("OBS WebSocket Server IP")
+        .setName("IP")
         .setDesc("Enter the IP address or 'localhost'")
         .addText((item) => {
             item.setValue(this.plugin.settings.websocketIP_Text).onChange(
@@ -31,7 +31,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OBS WebSocket Server PORT")
+        .setName("PORT")
         .addText((item) => {
             item.setValue(this.plugin.settings.websocketPort_Text).onChange(
                 (value) => {
@@ -42,7 +42,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OBS WebSocket Server Password")
+        .setName("Password")
         .addText((item) => {
             item.setValue(this.plugin.settings.websocketPW_Text).onChange(
                 (value) => {
@@ -53,13 +53,13 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("Open OBS")
+        .setName("OBS Launch Parameters")
         .setHeading()
         .setDesc("Open OBS with these options.")
         
         if(process.platform === "darwin"){
             new Setting(containerEl)
-            .setName("OBS app Name")
+            .setName("Name")
             .setDesc("Enter 'OBS' or a custom name")
             .addText((item) => {
                 item.setValue(this.plugin.settings.obsAppName_Text).onChange(
@@ -72,8 +72,8 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         
         if(process.platform === "win32"){
             new Setting(containerEl)
-            .setName("OBS app Name")
-            .setDesc("Enter 'OBS' or a custom name")
+            .setName("Name")
+            .setDesc("Enter 'obs64.exe' or a custom name")
             .addText((item) => {
                 item.setValue(this.plugin.settings.obsAppName_Text).onChange(
                     (value) => {
@@ -94,7 +94,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
             }
 
         new Setting(containerEl)
-        .setName("OBS Collection")
+        .setName("Collection")
         .addText((item) => {
             item.setValue(this.plugin.settings.obsCollection_Text).onChange(
                 (value) => {
@@ -104,7 +104,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OBS Debug Port")
+        .setName("OBS Browser Source Debug Port")
         .setDesc("Enter a Port for the Remote Debugger, or leave blank to skip this option")
         .addText((item) => {
             item.setValue(this.plugin.settings.obsDebugPort_Text).onChange(
@@ -115,11 +115,11 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OSC Server Settings")
+        .setName("OSC Server")
         .setHeading()
 
         new Setting(containerEl)
-        .setName("OSC IP address")
+        .setName("IP")
         .setDesc("Enter the IP address or 'localhost'")
         .addText((item) => {
             item.setValue(this.plugin.settings.oscIP_Text).onChange(
@@ -130,7 +130,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OSC Incoming Message PORT")
+        .setName("Incoming Message PORT")
         .addText((item) => {
             item.setValue(this.plugin.settings.oscInPort_Text).onChange(
                 (value) => {
@@ -140,7 +140,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("OSC Out going Message PORT")
+        .setName("Out going Message PORT")
         .addText((item) => {
             item.setValue(this.plugin.settings.oscOutPort_Text).onChange(
                 (value) => {

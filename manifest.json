@@ -3,9 +3,9 @@
 	"name": "UUhimsy",
 	"version": "0.0.1",
 	"minAppVersion": "1.7.7",
-	"description": "A plugin to connect Obsidian to OBS, zoomOSC, Apple Shortcuts.",
+	"description": "A plugin to add functionality to the Slides Extended Plugin and connect Obsidian to OBS, zoomOSC, and Apple Shortcuts.",
 	"author": "UUoocl",
 	"authorUrl": "https://github.com/UUoocl/UUhimsyPlugin",
-	"fundingUrl": "",
+	"fundingUrl": "https://github.com/sponsors/UUoocl",
 	"isDesktopOnly": true
 }

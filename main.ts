@@ -224,7 +224,7 @@ export default class uuhimsyPlugin extends Plugin {
 //
 //	
 //	#region Get Scenes from OBS feature
-//  1. populate the template folder with OBS Scenes
+//  1. populate the _slide_Tags folder with OBS Scenes
 //	2. Add tags to slides
 //
 		this.addCommand({
@@ -272,7 +272,7 @@ export default class uuhimsyPlugin extends Plugin {
 				const sceneList = await obs.call("GetSceneList");
 				console.log(sceneList)
 				sceneList.scenes.forEach(async (scene, index) => {
-					// find scenes starting with "Scene"
+					// find scenes starting with "scene"
 					if (scene.sceneName.startsWith("scene|||")) {
 						const sceneName = scene.sceneName.split("|||");
 						
@@ -286,8 +286,6 @@ export default class uuhimsyPlugin extends Plugin {
 
 						fileName = `Exit Scene - ${sceneName[1]}`;
 						existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-						console.log(fileName)
-						console.log("existing",existing)
 						if (!existing) {
 							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 								`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
@@ -299,7 +297,7 @@ export default class uuhimsyPlugin extends Plugin {
 				//}
 				
 			//create Camera Template Notes
-				let cameraSources = await obs.call("GetSceneItemList", { sceneName: "Camera" });
+				let cameraSources = await obs.call("GetSceneItemList", { sceneName: "Input Camera" });
 				cameraSources.sceneItems.forEach(async(source, index) => {
 				
 					let fileName = `Entrance Camera - ${source.sourceName}`;
@@ -312,6 +310,7 @@ export default class uuhimsyPlugin extends Plugin {
 					
 					fileName = `Exit Camera - ${source.sourceName}`;
 					existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
+					
 					if (!existing) {
 						await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
 							`<!-- slide data-camera-exit="${source.sourceName}" --> `,

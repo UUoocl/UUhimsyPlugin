@@ -1,94 +1,90 @@
-# Obsidian Sample Plugin
+# UUhimsy Plugin
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+This is a plugin for Obsidian (https://obsidian.md).
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+This project adds OBS automation functionality to the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended).  
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+Start with the [UUhimsy vault](https://github.com/UUoocl/UUhimsy)  
 
-## First time developing plugins?
+This plugin has the following features.
+- A settings page to configure OBS, OBS webSocket Server and an OSC Server
+- Adds a command to open the OBS app with launch parameters.
+- Adds a command to add "Tags" to slides
+- Creates a websocket connection between OBS and Apple Shortcuts
+- Creates a websocket connection between OBS and ZoomOSC
+- Creates a websocket connection between OBS and UVC-Util CLI
 
-Quick starting guide for new plugin devs:
+![image](https://github.com/user-attachments/assets/4789585c-021e-4a50-ac6d-ee1c19f1913f)
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+## How to use UUhimsy Plugin
 
-## Releasing new releases
+### Connect to OBS 
+In the UUhimsy settings tab, configure the OBS launch parameters. The settings will be used in the "Open OBS" command.  
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+![image](https://github.com/user-attachments/assets/10e24711-c2d0-48a7-98c3-cd20de8d9bb4)
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+#### **OBS WebSocket Server (WSS) Settings**
+  |Settings| Value |
+  |---|---|
+  |IP| 'localhost' or the host machines IP|
+  |PORT| default 4455.  
+  |Password| set a secure password.  
+  
+#### **OBS Launch Parameters**
+  |Settings| Value |
+  |---|---|
+  |Name| If multiple instances of OBS are installed enter the custom OBS name. |
+  |Folder Path|Windows Only. Enter the Folder Path to the OBS executable|
+  |Collection| Enter an OBS Scene Collection name   
+  |OBS Debug Port| OBS Browser Sources can be debugged at https://localhost:{Port}. Default Port = 9222  
 
-## Adding your plugin to the community plugin list
+#### **Open OBS**
+  The UUhimsy Plugin features a command to open OBS.  
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+  Open the command palette and enter "**Open OBS**"
 
-## How to use
+![image](https://github.com/user-attachments/assets/3352b9c9-1886-4c0e-aaf8-0a0c567474d2)
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+OBS should launch with the choosen parameters  
 
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+- Command line executed by "Open OBS"
+  - MacOS: 
+```
+  open -n -a "{Name}" --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debuggin Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password}"
+```
+  - Windows:  
+```
+  {App Path}{App Name} --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debugging Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password}"
 ```
 
-If you have multiple URLs, you can also do:
+#### **Create Slide Tags**
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
+  UUhimsy uses slide tags to automate actions when a slide transitions.  For example, use a slide to change scenes in OBS when a slide transition starts. 
 
-## API Documentation
+  Slide tags are created with the commands. Open the Command Palette and choose an
 
-See https://github.com/obsidianmd/obsidian-api
+  |Slide tag| Command| Notes|
+  |---|---|---|
+  |OBS Scenes|"Get OBS Scene tags"|- A tag is made for each Scene starting with "scene\|\|\|" and  <br>- A tag is made for each Source in the "Input Camera" scene|
+  |Apple Shortcut|"Get Apple Shortcuts Tags"|- A tag is made for each Shortcut starting with "uu". MacOS only feature.|
+  |USB Camera: Pan, Tilt, Zoom |"**Start sending camera PTZ position to OBS**"|The utility application [UVC-Util](https://github.com/jtfrey/uvc-util) is included to retrieve Pan, Tilt, Zoom (PTZ) data from USB PTZ cameras. <br>  MacOS only feature.|
+  |ZoomOSC|"Start OSC to OBS Websocket connection"| [ZoomOSC](https://www.liminalet.com/zoomosc) is a client by Zoom with an OSC interface.|
+
+#### **Insert a Slide Tag**
+
+  In a Slides Extended slide, position the cursor above the slide break indicator "---".
+  Open the command palette, and choose "Insert slide exit tag" or "Insert slide entrance tag".  
+
+  >[!NOTE] Tag Types
+  >'Exit' tags run when a slide transition starts 
+  >'Entrance' tags run when a slide transition ends
+
+After choosing to insert a tag, then a list of tags appear in the command palette. Select the tag to insert
+
+## UUhimsy system
+
+This plugin is a part of the [UUhimsy](https://github.com/UUoocl/UUhimsy) system.
+The UUhimsy repo combines the 3 tools
+- [UUhimsy plugin](https://github.com/UUoocl/UUhimsyPlugin)
+- [Keyboard and Mouse Visualization](https://github.com/UUoocl/keyboard_and_mouse_visuals)
+- [Get User Media](https://github.com/UUoocl/GUM)  
