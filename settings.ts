@@ -147,7 +147,44 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                     this.plugin.settings.oscOutPort_Text = value;
                     this.plugin.saveSettings()
                     
-             })
+                })
+            });
+        
+        new Setting(containerEl)
+        .setName("Add UUhimsy scripts to Slides Extended Template")
+        .setHeading()
+        .setDesc("UUhimsy scripts will be included when exporting Slides Extended slides")
+        .addButton((button) => {
+            button
+                .setButtonText("Add UUhimsy scripts to Slides Extended Template")
+                .setTooltip("UUhimsy scripts are included when exporting from Slides Extended")
+                .setCta()
+                .onClick(async ()=>{
+                    const fileName = `.obsidian/plugins/slides-extended/template/reveal.html`;
+                    const existing = await this.app.vault.adapter.exists(normalizePath(`${fileName}`));
+                    if (existing) {
+                        let file = await this.app.vault.adapter.read(normalizePath(`${fileName}`))
+                        if(file.includes(`<script src="/_browser_Sources/js/revealSlideControls.js"></script>`)){
+                            console.log('template already includes uuhimsy scripts')
+                        }
+                        else{
+                            console.log('adding scripts')
+                            return await this.app.vault.adapter.process(normalizePath(`${fileName}`), (data) =>{
+                                return data.replace('</body>',`    <script src="/_browser_Sources/obs_webSocket_details/websocketDetails.js"></script>
+    <script src="/_browser_Sources/obs_webSocket_details/obs-ws.js"></script>
+    <script src="/_browser_Sources/obs_webSocket_details/obsConnect.js"></script>
+    <script src="/_browser_Sources/obs_webSocket_details/startConnection.js"></script>
+    <script src="/_browser_Sources/js/revealSlideControls.js"></script>
+</body>`)
+                        })
+                    }
+                }
+            })
+                //     this.plugin.settings.oscOutPort_Text).onChange(
+                // (value) => {
+                //     this.plugin.settings.oscOutPort_Text = value;
+                //     this.plugin.saveSettings()
+                //  })
         });
 
         async function refresh_websocketDetailsJS(obsidian){
@@ -156,10 +193,10 @@ export class uuhimsySettingsTab extends PluginSettingTab {
             if (!existing) {
                 await obsidian.app.vault.create(`${fileName}`, 
                     `var wssDetails = {
-    "IP":"${obsidian.plugin.settings.websocketIP_Text}",
-    "PORT":"${obsidian.plugin.settings.websocketPort_Text}",
-    "PW":"${obsidian.plugin.settings.websocketPW_Text}"
-};`,);
+                    "IP":"${obsidian.plugin.settings.websocketIP_Text}",
+                    "PORT":"${obsidian.plugin.settings.websocketPort_Text}",
+                    "PW":"${obsidian.plugin.settings.websocketPW_Text}"
+                };`,);
             } else{
                 await obsidian.app.vault.delete(obsidian.app.vault.getFileByPath(fileName));
                 await obsidian.app.vault.create(`${fileName}`, 
