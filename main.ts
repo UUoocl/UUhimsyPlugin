@@ -627,15 +627,28 @@ this.addCommand({
 					exec(commandString);
 				}
 				if (process.platform === 'win32') {
-					commandString = `"${this.settings.obsAppPath_Text}${this.settings.obsAppName_Text}"`;
+					const path = require('path');
+					const obsPath = `${this.settings.obsAppPath_Text}${this.settings.obsAppName_Text}`
+					const obsDir = path.dirname(obsPath);
+					process.chdir(obsDir)
+		
+					commandString = `${this.settings.obsAppName_Text}`;
 					commandString += ` --args --collection "${this.settings.obsCollection_Text}"`;
 					commandString += ` --remote-debugging-port=${this.settings.obsDebugPort_Text}`;
 					commandString += ` --remote-allow-origins=http://localhost:${this.settings.obsDebugPort_Text}`;
 					commandString += ` --websocket_port "${this.settings.websocketPort_Text}"`;
 					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
-					commandString += ` --multi`;
-					exec(commandString);
-				}
+					commandString += ` --multi'`;
+		
+					exec(commandString, (error, stdout, stderr) => {
+					  if (error) {
+						  console.error(`exec error: ${error}`);
+						  return;
+					  }
+					  console.log(`stdout: ${stdout}`);
+					  console.error(`stderr: ${stderr}`);
+					});
+				  }
 				console.log(commandString)
 
 				}
