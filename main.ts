@@ -516,7 +516,7 @@ this.addCommand({
 				//let shortcuts =  JSON.stringify(stdout)
 				let shortcuts =  stdout.split('\n')
 
-				shortcuts = shortcuts.filter((shortcut) => {return shortcut.toLowerCase().startsWith("uu")})
+				shortcuts = shortcuts.filter((shortcut) => {return shortcut.toLowerCase().startsWith("uuhimsy")})
 				console.log(shortcuts);
 				console.log(typeof shortcuts);
 				Object.entries(shortcuts).forEach(async([key, shortcut]) => {
@@ -587,11 +587,25 @@ this.addCommand({
 		obs.on("CustomEvent", async function (event){
 			console.log("Message from OBS",event);
 			if (event.event_name === "run-shortcut") {
+				//update OBS Source CommandText
+				await obs.call("SetInputSettings", {
+					inputName: "CommandText",
+					inputSettings: {
+					  text: `${event.event_name} ${event.shortcut_name}`
+					}
+				  });
 				console.log('command',`'shortcuts' run ${event.shortcut_name}`)
 				const stdout =  execSync(`'shortcuts' run ${event.shortcut_name}`,{encoding: 'utf8',});
-				console.log(stdout)
+				console.log("shortcut result ",stdout)
 				//console.log(stderr)
 				//If Shortcut returns a result, then call OBS
+				//Update OBS Source CommandResultsText
+				await obs.call("SetInputSettings", {
+					inputName: "CommandResultsText",
+					inputSettings: {
+					  text: `${stdout}`
+					}
+				});
 			}
 		})
 	}})
