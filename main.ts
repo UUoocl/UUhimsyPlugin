@@ -638,7 +638,7 @@ this.addCommand({
 					commandString += ` --remote-allow-origins=http://localhost:${this.settings.obsDebugPort_Text}`;
 					commandString += ` --websocket_port "${this.settings.websocketPort_Text}"`;
 					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
-					commandString += ` --multi'`;
+					commandString += ` --multi`;
 		
 					exec(commandString, (error, stdout, stderr) => {
 					  if (error) {
