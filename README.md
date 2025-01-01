@@ -2,7 +2,9 @@
 
 This is a plugin for Obsidian (https://obsidian.md).
 
-This project adds OBS automation functionality to the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended).  
+This project adds OBS automation functionality to Obsidian. 
+
+the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended).  
 
 Start with the [UUhimsy vault](https://github.com/UUoocl/UUhimsy)  
 
@@ -50,16 +52,18 @@ OBS should launch with the choosen parameters
 - Command line executed by "Open OBS"
   - MacOS: 
 ```
-  open -n -a "{Name}" --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debuggin Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password}"
+  open -n -a "{Name}" --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debuggin Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password} --multi"
 ```
   - Windows:  
 ```
-  {App Path}{App Name} --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debugging Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password}"
+  {App Name} --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debugging Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password} --multi"
 ```
 
 #### **Create Slide Tags**
 
   UUhimsy uses slide tags to automate actions when a slide transitions.  For example, use a slide to change scenes in OBS when a slide transition starts. 
+
+  In the UUhimsy settings, click the "Add UUhimsy scripts to Slides Extended Template" button.  
 
   Slide tags are created with the commands. Open the Command Palette and choose an
 
@@ -88,3 +92,6 @@ The UUhimsy repo combines the 3 tools
 - [UUhimsy plugin](https://github.com/UUoocl/UUhimsyPlugin)
 - [Keyboard and Mouse Visualization](https://github.com/UUoocl/keyboard_and_mouse_visuals)
 - [Get User Media](https://github.com/UUoocl/GUM)  
+
+
+![image](https://github.com/user-attachments/assets/cc50192c-9ba6-4c2f-bdc3-92f8751bcbc3)
