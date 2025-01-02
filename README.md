@@ -61,7 +61,7 @@ OBS should launch with the choosen parameters
   {App Name} --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debugging Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password} --multi"
 ```
 
-#### **Create Slide Tags**
+### Create Slide Tags
 
   UUhimsy uses slide tags to automate actions when a slide transitions.  For example, use a slide to change scenes in OBS when a slide transition starts. 
 
