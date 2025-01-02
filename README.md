@@ -2,7 +2,7 @@
 
 This is a plugin for Obsidian (https://obsidian.md).
 
-This project integrates Obsidian, OBS, Zoom and automation tools to create entertaining and engaging experiences. 
+This project integrates Obsidian, OBS, Zoom and automation tools to create whimsical experiences. 
 
 UUhimsy includes a feature to add tags to slides created in the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended) that trigger automation actions.  For example,  change scenes in OBS when transitioning between slides. 
 

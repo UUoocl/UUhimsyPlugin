@@ -3,9 +3,9 @@
 	"name": "UUhimsy",
 	"version": "0.0.1",
 	"minAppVersion": "1.7.7",
-	"description": "Integrate Obsidian, OBS, Zoom and automation tools to create whimsical experiences.",
+	"description": "Integrate OBS, Zoom and automation tools to create whimsical experiences.",
 	"author": "UUoocl",
-	"authorUrl": "https://github.com/UUoocl/UUhimsyPlugin",
+	"authorUrl": "https://github.com/UUoocl",
 	"fundingUrl": "https://github.com/sponsors/UUoocl",
 	"isDesktopOnly": true
 }
