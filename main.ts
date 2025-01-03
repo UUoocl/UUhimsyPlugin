@@ -585,17 +585,24 @@ this.addCommand({
 
 		//listen for Shortcut Request
 		obs.on("CustomEvent", async function (event){
-			console.log("Message from OBS",event);
 			if (event.event_name === "run-shortcut") {
+				console.log("message from OBS",event);
+				console.log(JSON.stringify(event.event_data));
 				//update OBS Source CommandText
 				await obs.call("SetInputSettings", {
 					inputName: "CommandText",
 					inputSettings: {
-					  text: `${event.event_name} ${event.shortcut_name}`
+						text: `${event.event_name} ${event.event_data.shortcut_name}`
 					}
-				  });
-				console.log('command',`'shortcuts' run ${event.shortcut_name}`)
-				const stdout =  execSync(`'shortcuts' run ${event.shortcut_name}`,{encoding: 'utf8',});
+				});
+				console.log('command',`'shortcuts' run ${event.event_data.shortcut_name}`)
+				//if has input
+				let stdout 
+				if (Object.hasOwn(event, "event.event_data.shortcut_input")) {
+					stdout =  execSync(`'shortcuts' run "${event.event_data.shortcut_name}" <<< "${event.event_data.shortcut_input}"`,{encoding: 'utf8',});
+				}else{
+					stdout =  execSync(`'shortcuts' run "${event.event_data.shortcut_name}"`,{encoding: 'utf8',});
+				}
 				console.log("shortcut result ",stdout)
 				//console.log(stderr)
 				//If Shortcut returns a result, then call OBS
