@@ -553,9 +553,9 @@ this.addCommand({
 		
 		
 		//connect to OBS
-		var websocketIP = this.settings.websocketIP_Text;
-		var websocketPort = this.settings.websocketPort_Text;
-		var websocketPassword = this.settings.websocketPW_Text;
+		let websocketIP = this.settings.websocketIP_Text;
+		let websocketPort = this.settings.websocketPort_Text;
+		let websocketPassword = this.settings.websocketPW_Text;
 		
 		/*
 		*Connect this app to OBS
@@ -582,7 +582,6 @@ this.addCommand({
 		});
 		console.log(`ws://${websocketIP}:${websocketPort}`);
 		
-
 		//listen for Shortcut Request
 		obs.on("CustomEvent", async function (event){
 			if (event.event_name === "run-shortcut") {
@@ -596,12 +595,15 @@ this.addCommand({
 					}
 				});
 				console.log('command',`'shortcuts' run ${event.event_data.shortcut_name}`)
+				console.log("prop check",Object.hasOwn(event.event_data, "shortcut_input"))
 				//if has input
 				let stdout 
-				if (Object.hasOwn(event, "event.event_data.shortcut_input")) {
-					stdout =  execSync(`'shortcuts' run "${event.event_data.shortcut_name}" <<< "${event.event_data.shortcut_input}"`,{encoding: 'utf8',});
+				if (Object.hasOwn(event.event_data, "shortcut_input")) {
+					console.log("running with input")
+					stdout =  execSync(`'shortcuts' run '${event.event_data.shortcut_name}' <<< '${event.event_data.shortcut_input}'`,{encoding: 'utf8',});
 				}else{
-					stdout =  execSync(`'shortcuts' run "${event.event_data.shortcut_name}"`,{encoding: 'utf8',});
+					console.log("running with OUT input")
+					stdout =  execSync(`'shortcuts' run '${event.event_data.shortcut_name}'`,{encoding: 'utf8',});
 				}
 				console.log("shortcut result ",stdout)
 				//console.log(stderr)
@@ -624,7 +626,7 @@ this.addCommand({
 //
 //		
 // #region Open OBS feature
-//  Only show this command to macOS users
+// 
 //
 //	Execute a command line to Open OBS
 
