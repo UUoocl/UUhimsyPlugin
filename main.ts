@@ -1,6 +1,7 @@
-import { Notice, Plugin, normalizePath, DataAdapter } from 'obsidian';
+import { Notice, Plugin, normalizePath, DataAdapter,WorkspaceLeaf } from 'obsidian';
 import { uuhimsySettingsTab } from 'settings';
 import { UUhimsyEntranceSuggest, UUhimsyExitSuggest } from 'suggest';
+import { UUHIMSY_VIEW_TYPE, UUhimsyView } from 'view';
 
 //include system command 
 const { execSync } = require('child_process');
@@ -52,12 +53,19 @@ export default class uuhimsyPlugin extends Plugin {
 	async saveSettings(){
 		this.saveData(this.settings);
 	}
+
+
 		
 	async onload() {
 
 		await this.loadSettings();
 		
+		this.registerView(UUHIMSY_VIEW_TYPE, (leaf) => new UUhimsyView(leaf))
 		
+
+		this.addRibbonIcon("wand-sparkles", "UUhimsy tags", () => {
+			this.openView();
+		})
 		this.addSettingTab(new uuhimsySettingsTab(this.app, this))
 		
 		new Notice("Enabled OSC plugin")	
@@ -77,12 +85,12 @@ export default class uuhimsyPlugin extends Plugin {
 			callback:() => {
 			//this.addRibbonIcon("activity","start OSC to Websocket", () =>{
 			new Notice("Starting OSC Server")
-			var websocketIP = this.settings.websocketIP_Text;
-			var websocketPort = this.settings.websocketPort_Text;
-			var websocketPassword = this.settings.websocketPW_Text;
-			var oscIP = this.settings.oscIP_Text;
-			var oscInPORT = this.settings.oscInPort_Text;
-			var oscOutPORT = this.settings.oscOutPort_Text;
+			let websocketIP = this.settings.websocketIP_Text;
+			let websocketPort = this.settings.websocketPort_Text;
+			let websocketPassword = this.settings.websocketPW_Text;
+			let oscIP = this.settings.oscIP_Text;
+			let oscInPORT = this.settings.oscInPort_Text;
+			let oscOutPORT = this.settings.oscOutPort_Text;
 			
 			setOSCconnection(
 				websocketIP,
@@ -139,7 +147,7 @@ export default class uuhimsyPlugin extends Plugin {
 					*OSC app -- to--> OBS
 					*/
 					
-					var oscServer = new Server(oscInPORT, oscIP);
+					let oscServer = new Server(oscInPORT, oscIP);
 					
 					oscServer.on("listening", () => {
 						console.log("OSC Server is listening.");
@@ -226,16 +234,17 @@ export default class uuhimsyPlugin extends Plugin {
 //	#region Get Scenes from OBS feature
 //  1. populate the _slide_Tags folder with OBS Scenes
 //	2. Add tags to slides
+//	3. 
 //
 		this.addCommand({
 			id: 'get-obs-scene-tags',
-			name: 'Get OBS Scene tags',
+			name: 'Get OBS tags',
 			callback: async() => {
 		 //this.addRibbonIcon("image-down","get OBS Scene Options", async () =>{
-			new Notice("Get OBS Scenes")
-			var websocketIP = this.settings.websocketIP_Text;
-			var websocketPort = this.settings.websocketPort_Text;
-			var websocketPassword = this.settings.websocketPW_Text;
+			new Notice("Getting OBS Tags")
+			let websocketIP = this.settings.websocketIP_Text;
+			let websocketPort = this.settings.websocketPort_Text;
+			let websocketPassword = this.settings.websocketPW_Text;
 			
 			/*
 			*Connect this app to OBS
@@ -276,22 +285,22 @@ export default class uuhimsyPlugin extends Plugin {
 					if (scene.sceneName.startsWith("scene|||")) {
 						const sceneName = scene.sceneName.split("|||");
 						
-						let fileName = `Entrance Scene - ${sceneName[1]}`;
+						let fileName = `Scene - ${sceneName[1]}`;
 						let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						if (!existing) {
 							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-								`<!-- slide data-scene-entrance="${sceneName[1]}" --> `,
+								``,
 							);		
 						}
 
-						fileName = `Exit Scene - ${sceneName[1]}`;
-						existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-						if (!existing) {
-							await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-								`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
-							);
+						// fileName = `Exit Scene - ${sceneName[1]}`;
+						// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
+						// if (!existing) {
+						// 	await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
+						// 		`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
+						// 	);
 							
-						}
+						// }
 					}	
 				});
 				//}
@@ -300,24 +309,25 @@ export default class uuhimsyPlugin extends Plugin {
 				let cameraSources = await obs.call("GetSceneItemList", { sceneName: "Input Camera" });
 				cameraSources.sceneItems.forEach(async(source, index) => {
 				
-					let fileName = `Entrance Camera - ${source.sourceName}`;
+					let fileName = `Camera - ${source.sourceName}`;
 					let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 					if (!existing) {
 						await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-							`<!-- slide data-camera-entrance="${source.sourceName}" --> `,
+							``,
 						);		
 					}
 					
-					fileName = `Exit Camera - ${source.sourceName}`;
-					existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
+					// fileName = `Exit Camera - ${source.sourceName}`;
+					// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 					
-					if (!existing) {
-						await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-							`<!-- slide data-camera-exit="${source.sourceName}" --> `,
-							);		
-					}
+					// if (!existing) {
+					// 	await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
+					// 		`<!-- slide data-camera-exit="${source.sourceName}" --> `,
+					// 		);		
+					// }
 				});
              //End of get scene function
+			 obs.disconnect();
 			}})
 
 			// this.addRibbonIcon("scroll", "entrance tag", () => {
@@ -358,9 +368,9 @@ export default class uuhimsyPlugin extends Plugin {
 						if(!checking){
 							
 							console.log("true")
-							var websocketIP = this.settings.websocketIP_Text;
-							var websocketPort = this.settings.websocketPort_Text;
-							var websocketPassword = this.settings.websocketPW_Text;
+							let websocketIP = this.settings.websocketIP_Text;
+							let websocketPort = this.settings.websocketPort_Text;
+							let websocketPassword = this.settings.websocketPW_Text;
 			
 			/*
 			*Connect this app to OBS
@@ -483,8 +493,8 @@ export default class uuhimsyPlugin extends Plugin {
 		name: 'Stop sending camera PTZ position to OBS',
 		callback:() =>{
 			// Set a fake timeout to get the highest timeout id
-			var highestTimeoutId = setTimeout(";");
-			for (var i = 0 ; i < highestTimeoutId ; i++) {
+			let highestTimeoutId = setTimeout(";");
+			for (let i = 0 ; i < highestTimeoutId ; i++) {
 				clearTimeout(i); 
 			}
 		}
@@ -509,7 +519,7 @@ this.addCommand({
 		let isMac = process.platform === 'darwin';
 		if (isMac){
 			if(!checking){
-				//This is a Mac computer fun the command
+				//This is a Mac computer run the command
 				const util = require('util');
 				const exec = util.promisify(require('child_process').exec);	
 				const { stdout, stderr } = await exec(`'shortcuts' list`);
@@ -519,26 +529,31 @@ this.addCommand({
 				shortcuts = shortcuts.filter((shortcut) => {return shortcut.toLowerCase().startsWith("uuhimsy")})
 				console.log(shortcuts);
 				console.log(typeof shortcuts);
+				const shortcutCount = Object.keys(shortcuts).length;
 				Object.entries(shortcuts).forEach(async([key, shortcut]) => {
 				//shortcuts.foreach(async (shortcut, index) => {
-					let fileName = `Entrance Shortcuts - ${shortcut}.md`;
+				console.log(key, shortcut, shortcutCount)
+					let fileName = `Shortcuts - ${shortcut}.md`;
 						let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						if (!existing) {
 							await this.app.vault.create(`_slide_Tags/${fileName}`, 
-								`<!-- slide data-shortcut-entrance="${shortcut}" --> `,
+								``,
 							);		
 						}
-
-						fileName = `Exit Shortcuts - ${shortcut}.md`;
-						existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-						console.log(fileName)
-						console.log("existing",existing)
-						if (!existing) {
-							await this.app.vault.create(`_slide_Tags/${fileName}`, 
-								`<!-- slide data-shortcut-exit="${shortcut}" --> `,
-							);
-						}
-				})	
+						if (Number(key) == shortcutCount - 1) {
+							// This is the last item
+							this.openView();
+						  }
+						// fileName = `Exit Shortcuts - ${shortcut}.md`;
+						// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
+						// console.log(fileName)
+						// console.log("existing",existing)
+						// if (!existing) {
+						// 	await this.app.vault.create(`_slide_Tags/${fileName}`, 
+						// 		`<!-- slide data-shortcut-exit="${shortcut}" --> `,
+						// 	);
+						// }
+				})
 			};
 		}
 	} 
@@ -548,7 +563,7 @@ this.addCommand({
 //LISTEN for Shortcut Request
 this.addCommand({
 	id: 'run-apple-shortcut',
-	name: 'Run Apple Shortcut',
+	name: 'Start Apple Shortcut Connection',
 	callback: async() => {
 		
 		
@@ -680,38 +695,95 @@ this.addCommand({
 
 // #endregion
 
-
-
-// 
 //
-//	TODO: a feature to automate modifying the "Slides Extended" template with Whimsy scripts
-// #region Modify 'Slides Extended' with UUhimsy Script
-// This allows the Slides Extended Plugin to connect to OBS  
 //
-//	
+//
+// #region Start OBS Websocket connection
+//
+this.addCommand({
+	id: 'connect-to-obs',
+	name: 'Start OBS Connection',
+	callback: async() => {
+		
+		//connect to OBS
+		let websocketIP = this.settings.websocketIP_Text;
+		let websocketPort = this.settings.websocketPort_Text;
+		let websocketPassword = this.settings.websocketPW_Text;
+		
+		//
+		// #region Connect this app to OBS
+		//
+		const obs = new OBSWebSocket(websocketIP, websocketPort, websocketPassword);
+		try {
+			const { obsWebSocketVersion, negotiatedRpcVersion } = await obs.connect(
+				`ws://${websocketIP}:${websocketPort}`,
+				websocketPassword,
+				{
+					rpcVersion: 1,
+				}
+			);
+			console.log(
+				`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
+			);
+			new Notice("Connected to OBS WebSocket Server")
+		} catch (error) {
+			new Notice("Failed to connect to OBS WebSocket Server")
+			console.error("Failed to connect", error.code, error.message);
+		}
+		obs.on("error", (err) => {
+			console.error("Socket error:", err);
+		});
+		console.log(`ws://${websocketIP}:${websocketPort}`);
+		// #endregion
 
-//COMMAND: find 'Slides Extended' Template file
+		//listen for Custom Events
+		obs.on("CustomEvent", async function (event){
+			if (event.event_name === "add-obsidian-tag") {
+				console.log("tag message from OBS",event);
+				const tag = JSON.parse(event.event_data.tag);
+				app.workspace.activeEditor?.editor?.replaceSelection(tag)
+			}
+			if (event.event_name === "open-gum-page") {
+				console.log("open gum message from OBS",event);
+				console.log("open gum message from OBS",this);
+				const port = app.plugins.plugins['slides-extended'].port;
+				window.open(`http://localhost:${port}/_GUM`)
+			}
+		});
+	}
+})
 
-//If file does not contain <script src="OBS Connect", then replace the </body> with <script>...</body> 
+
 
 // #endregion
 
-// 
-//
-//	TODO: a feature to automate setting file paths that OBS references.  Use the Obsidian vault location as the base file path 
-// #region Modify OBS Collection file paths 
-// 
-//
-//	
-
-//COMMAND: find OBS Collection file and change the file paths 
-
-// #endregion
 
 //End of onload()
 }
 
+async openView(){
+	const { workspace } = this.app;
+	this.app.workspace.detachLeavesOfType(UUHIMSY_VIEW_TYPE)	
+	let leaf: WorkspaceLeaf | null = null;
+    const leaves = workspace.getLeavesOfType(UUHIMSY_VIEW_TYPE);
+
+    if (leaves.length > 0) {
+      // A leaf with our view already exists, use that
+      leaf = leaves[0];
+    } else {
+      // Our view could not be found in the workspace, create a new leaf
+      // in the right sidebar for it
+      leaf = workspace.getRightLeaf(false);
+      await leaf.setViewState({ type: UUHIMSY_VIEW_TYPE, active: true });
+    }
+
+    // "Reveal" the leaf in case it is in a collapsed sidebar
+    workspace.revealLeaf(leaf);
+  }
+
 	onunload() {
+		this.app.workspace.detachLeavesOfType(UUHIMSY_VIEW_TYPE)
 		new Notice("Disabled UUhimsy plugin")
+
 	}
 }
