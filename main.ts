@@ -54,8 +54,6 @@ export default class uuhimsyPlugin extends Plugin {
 		this.saveData(this.settings);
 	}
 
-
-		
 	async onload() {
 
 		await this.loadSettings();
@@ -124,23 +122,22 @@ export default class uuhimsyPlugin extends Plugin {
 							rpcVersion: 1,
 						}
 					);
-					console.log(
-						`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
-					);
+					//console.log(`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`);
 					new Notice("Connected to OBS WebSocket Server")
 					initWebsocketFunctions();
 					//document.title = "connection set";
 				} catch (error) {
+					//console.error("Failed to connect", error.code, error.message);
 					new Notice("Failed to connect to OBS WebSocket Server")
-					console.error("Failed to connect", error.code, error.message);
 				}
 
 				function initWebsocketFunctions(){
 
 					obs.on("error", (err) => {
-						console.error("Socket error:", err);
+						//console.error("Socket error:", err);
+						new Notice(`Socket error:` ${err});
 					});
-					console.log(`ws://${websocketIP}:${websocketPort}`);
+					//console.log(`ws://${websocketIP}:${websocketPort}`);
 					
 					/*
 					*Create an OSC Server connection
@@ -150,16 +147,17 @@ export default class uuhimsyPlugin extends Plugin {
 					let oscServer = new Server(oscInPORT, oscIP);
 					
 					oscServer.on("listening", () => {
-						console.log("OSC Server is listening.");
+						//console.log("OSC Server is listening.");
+						new Notice("OSC Server is listening.");
 					});
 					
 					oscServer.on("message", (msg) => {
-						console.log(`Message: ${msg}`);
+						//console.log(`Message: ${msg}`);
 						sendToOBS(msg, obs, "osc-message");
 					});
 					
 					function sendToOBS(msgParam, obsParam, eventName) {
-						console.log("sending message:", JSON.stringify(msgParam));
+						//console.log("sending message:", JSON.stringify(msgParam));
 						const webSocketMessage = JSON.stringify(msgParam);
 						//send results to OBS Browser Source
 						obsParam.call("CallVendorRequest", {
@@ -179,44 +177,44 @@ export default class uuhimsyPlugin extends Plugin {
 				*message from OBS --to--> OSC app
 				*/
 				const oscClient = new Client(oscIP, oscOutPORT);
-				console.log("oscClient", oscClient, oscIP, oscOutPORT, oscInPORT);
+				//console.log("oscClient", oscClient, oscIP, oscOutPORT, oscInPORT);
 				
 				obs.on("CustomEvent", function (event) {
-					console.log("Message from OBS",event);
+					//console.log("Message from OBS",event);
 					if (event.event_name === "OSC-out") {
 						const message = new Message(event.address);
 						if (Object.hasOwn(event, "arg1")) {
 							message.append(event.arg1);
-							console.log("arg1", message);
+							//console.log("arg1", message);
 						}
 						if (Object.hasOwn(event, "arg2")) {
 							message.append(event.arg2);
-							console.log(message);
+							//console.log(message);
 						}
 						if (Object.hasOwn(event, "arg3")) {
 							message.append(event.arg3);
-							console.log(message);
+							//console.log(message);
 						}
 						if (Object.hasOwn(event, "arg4")) {
 							message.append(event.arg4);
-							console.log(message);
+							//console.log(message);
 						}
 						if (Object.hasOwn(event, "arg5")) {
 							message.append(event.arg5);
-							console.log(message);
+							//console.log(message);
 						}
 						if (Object.hasOwn(event, "arg6")) {
 							message.append(event.arg6);
-							console.log(message);
+							//console.log(message);
 						}
 						if (Object.hasOwn(event, "arg7")) {
 							message.append(event.arg7);
-							console.log(message);
+							//console.log(message);
 						}
-						console.log("message to OSC device", message);
+						//console.log("message to OSC device", message);
 						oscClient.send(message, (err) => {
 							if (err) {
-								console.error(new Error(err));
+								//console.error(new Error(err));
 							}
 						});
 						//client.send(`${event.command} "${event.data}"`)
@@ -258,28 +256,20 @@ export default class uuhimsyPlugin extends Plugin {
 						rpcVersion: 1,
 					}
 				);
-				console.log(
-					`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
-				);
+				//console.log(`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`);
 				new Notice("Connected to OBS WebSocket Server")
 				//document.title = "connection set";
 			} catch (error) {
 				new Notice("Failed to connect to OBS WebSocket Server")
-				console.error("Failed to connect", error.code, error.message);
+				//console.error("Failed to connect", error.code, error.message);
 			}
 			obs.on("error", (err) => {
-				console.error("Socket error:", err);
+				//console.error("Socket error:", err);
 			});
-			console.log(`ws://${websocketIP}:${websocketPort}`);
-			
-			//
-			// Get Scenes and camera
-			//
-			//setTimeout(() => obs.disconnect(), 3000);
+			//console.log(`ws://${websocketIP}:${websocketPort}`);
 			
 			//create Scene Template Notes
 				const sceneList = await obs.call("GetSceneList");
-				console.log(sceneList)
 				sceneList.scenes.forEach(async (scene, index) => {
 					// find scenes starting with "scene"
 					if (scene.sceneName.startsWith("scene|||")) {
@@ -292,15 +282,6 @@ export default class uuhimsyPlugin extends Plugin {
 								``,
 							);		
 						}
-
-						// fileName = `Exit Scene - ${sceneName[1]}`;
-						// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-						// if (!existing) {
-						// 	await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-						// 		`<!-- slide data-scene-exit="${sceneName[1]}" --> `,
-						// 	);
-							
-						// }
 					}	
 				});
 				//}
@@ -316,23 +297,10 @@ export default class uuhimsyPlugin extends Plugin {
 							``,
 						);		
 					}
-					
-					// fileName = `Exit Camera - ${source.sourceName}`;
-					// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-					
-					// if (!existing) {
-					// 	await this.app.vault.create(`_slide_Tags/${fileName}.md`, 
-					// 		`<!-- slide data-camera-exit="${source.sourceName}" --> `,
-					// 		);		
-					// }
 				});
              //End of get scene function
 			 obs.disconnect();
 			}})
-
-			// this.addRibbonIcon("scroll", "entrance tag", () => {
-			// 	new UUhimsyEntranceSuggest(this.app).open();
-			// })
 
 			this.addCommand({
 				id: 'insert-entrance-tag',
@@ -366,8 +334,6 @@ export default class uuhimsyPlugin extends Plugin {
 					let isMac = process.platform === 'darwin';
 					if (isMac){
 						if(!checking){
-							
-							console.log("true")
 							let websocketIP = this.settings.websocketIP_Text;
 							let websocketPort = this.settings.websocketPort_Text;
 							let websocketPassword = this.settings.websocketPW_Text;
@@ -384,19 +350,17 @@ export default class uuhimsyPlugin extends Plugin {
 						rpcVersion: 1,
 					}
 				);
-				console.log(
-					`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
-				);
+				//console.log(`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`);
 				new Notice("Connected to OBS WebSocket Server")
 				//document.title = "connection set";
 			} catch (error) {
 				new Notice("Failed to connect to OBS WebSocket Server")
-				console.error("Failed to connect", error.code, error.message);
+				//console.error("Failed to connect", error.code, error.message);
 			}
 			obs.on("error", (err) => {
-				console.error("Socket error:", err);
+				//console.error("Socket error:", err);
 			});
-			console.log(`ws://${websocketIP}:${websocketPort}`);
+			//console.log(`ws://${websocketIP}:${websocketPort}`);
 
 			//
 			//PTZ details
@@ -404,7 +368,6 @@ export default class uuhimsyPlugin extends Plugin {
 
 			//https://forum.obsidian.md/t/how-to-get-vault-absolute-path/22965
 			//@ts-ignore
-///////////make vaultPath an onLoad global variable
 			const vaultPath = normalizePath(`${this.app.vault.adapter.basePath}/${this.app.vault.configDir}/plugins/UUhimsyPlugin`)
 			const util = require('util');
 			const exec = util.promisify(require('child_process').exec);
@@ -442,7 +405,7 @@ export default class uuhimsyPlugin extends Plugin {
 
 			async function getCameraPanTilt(vaultPath, util, exec) {				
 				try {
-				console.log(vaultPath)
+				//console.log(vaultPath)
 				const { stdout, stderr } = await exec(`'${vaultPath}/uvc-util' -I 0 -o pan-tilt-abs`);
 				//console.log('stdout:', stdout);
 				//console.log('stderr:', stderr);
@@ -451,7 +414,7 @@ export default class uuhimsyPlugin extends Plugin {
 				return ptResult;
 				
 				} catch (e) {
-				  console.error(e); // should contain code (exit code) and signal (that caused the termination).
+				  //console.error(e); // should contain code (exit code) and signal (that caused the termination).
 				}
 			  }
 
@@ -463,17 +426,17 @@ export default class uuhimsyPlugin extends Plugin {
 				return stdout.replace(/\n/g, "");
 			
 				} catch (e) {
-				  console.error(e); // should contain code (exit code) and signal (that caused the termination).
+				  //console.error(e); // should contain code (exit code) and signal (that caused the termination).
 				}
 			  }
 			
 			  obs.on("CustomEvent", async function (event){
 				
-				console.log("Message from OBS",event);
+				//console.log("Message from OBS",event);
 				if (event.event_name === "set-ptz") {
-					console.log('command',`'shortcuts' run ${event.shortcut_name}`)
+					//console.log('command',`'shortcuts' run ${event.shortcut_name}`)
 					const stdout =  await exec(`'${vaultPath}/uvc-util' -I 0 -o pan-tilt-abs`);
-					console.log(stdout)
+					//console.log(stdout)
 				}
 			  })
 
@@ -527,12 +490,10 @@ this.addCommand({
 				let shortcuts =  stdout.split('\n')
 
 				shortcuts = shortcuts.filter((shortcut) => {return shortcut.toLowerCase().startsWith("uuhimsy")})
-				console.log(shortcuts);
-				console.log(typeof shortcuts);
 				const shortcutCount = Object.keys(shortcuts).length;
 				Object.entries(shortcuts).forEach(async([key, shortcut]) => {
 				//shortcuts.foreach(async (shortcut, index) => {
-				console.log(key, shortcut, shortcutCount)
+				//console.log(key, shortcut, shortcutCount)
 					let fileName = `Shortcuts - ${shortcut}.md`;
 						let existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
 						if (!existing) {
@@ -544,15 +505,6 @@ this.addCommand({
 							// This is the last item
 							this.openView();
 						  }
-						// fileName = `Exit Shortcuts - ${shortcut}.md`;
-						// existing = await this.app.vault.adapter.exists(normalizePath(`_slide_Tags/${fileName}`));
-						// console.log(fileName)
-						// console.log("existing",existing)
-						// if (!existing) {
-						// 	await this.app.vault.create(`_slide_Tags/${fileName}`, 
-						// 		`<!-- slide data-shortcut-exit="${shortcut}" --> `,
-						// 	);
-						// }
 				})
 			};
 		}
@@ -584,24 +536,21 @@ this.addCommand({
 					rpcVersion: 1,
 				}
 			);
-			console.log(
-				`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
-			);
+			//console.log(`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`);
 			new Notice("Connected to OBS WebSocket Server")
 		} catch (error) {
 			new Notice("Failed to connect to OBS WebSocket Server")
-			console.error("Failed to connect", error.code, error.message);
+			//console.error("Failed to connect", error.code, error.message);
 		}
 		obs.on("error", (err) => {
-			console.error("Socket error:", err);
+			//console.error("Socket error:", err);
 		});
-		console.log(`ws://${websocketIP}:${websocketPort}`);
+		//console.log(`ws://${websocketIP}:${websocketPort}`);
 		
 		//listen for Shortcut Request
 		obs.on("CustomEvent", async function (event){
 			if (event.event_name === "run-shortcut") {
-				console.log("message from OBS",event);
-				console.log(JSON.stringify(event.event_data));
+				//console.log("message from OBS",event);
 				//update OBS Source CommandText
 				await obs.call("SetInputSettings", {
 					inputName: "CommandText",
@@ -609,18 +558,16 @@ this.addCommand({
 						text: `${event.event_name} ${event.event_data.shortcut_name}`
 					}
 				});
-				console.log('command',`'shortcuts' run ${event.event_data.shortcut_name}`)
-				console.log("prop check",Object.hasOwn(event.event_data, "shortcut_input"))
 				//if has input
 				let stdout 
 				if (Object.hasOwn(event.event_data, "shortcut_input")) {
-					console.log("running with input")
+					//console.log("running with input")
 					stdout =  execSync(`'shortcuts' run '${event.event_data.shortcut_name}' <<< '${event.event_data.shortcut_input}'`,{encoding: 'utf8',});
 				}else{
-					console.log("running with OUT input")
+					//console.log("running with OUT input")
 					stdout =  execSync(`'shortcuts' run '${event.event_data.shortcut_name}'`,{encoding: 'utf8',});
 				}
-				console.log("shortcut result ",stdout)
+				//console.log("shortcut result ",stdout)
 				//console.log(stderr)
 				//If Shortcut returns a result, then call OBS
 				//Update OBS Source CommandResultsText
@@ -680,14 +627,14 @@ this.addCommand({
 		
 					exec(commandString, (error, stdout, stderr) => {
 					  if (error) {
-						  console.error(`exec error: ${error}`);
+						  //console.error(`exec error: ${error}`);
 						  return;
 					  }
-					  console.log(`stdout: ${stdout}`);
-					  console.error(`stderr: ${stderr}`);
+					  //console.log(`stdout: ${stdout}`);
+					  //console.error(`stderr: ${stderr}`);
 					});
 				  }
-				console.log(commandString)
+				//console.log(commandString)
 
 				}
 			}
@@ -722,30 +669,28 @@ this.addCommand({
 					rpcVersion: 1,
 				}
 			);
-			console.log(
-				`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`
-			);
+			//console.log(`Connected to server ${obsWebSocketVersion} (using RPC ${negotiatedRpcVersion})`);
 			new Notice("Connected to OBS WebSocket Server")
 		} catch (error) {
 			new Notice("Failed to connect to OBS WebSocket Server")
-			console.error("Failed to connect", error.code, error.message);
+			//console.error("Failed to connect", error.code, error.message);
 		}
 		obs.on("error", (err) => {
-			console.error("Socket error:", err);
+			//console.error("Socket error:", err);
 		});
-		console.log(`ws://${websocketIP}:${websocketPort}`);
+		//console.log(`ws://${websocketIP}:${websocketPort}`);
 		// #endregion
 
 		//listen for Custom Events
 		obs.on("CustomEvent", async function (event){
 			if (event.event_name === "add-obsidian-tag") {
-				console.log("tag message from OBS",event);
+				//console.log("tag message from OBS",event);
 				const tag = JSON.parse(event.event_data.tag);
 				app.workspace.activeEditor?.editor?.replaceSelection(tag)
 			}
 			if (event.event_name === "open-gum-page") {
-				console.log("open gum message from OBS",event);
-				console.log("open gum message from OBS",this);
+				//console.log("open gum message from OBS",event);
+				//console.log("open gum message from OBS",this);
 				const port = app.plugins.plugins['slides-extended'].port;
 				window.open(`http://localhost:${port}/_GUM`)
 			}

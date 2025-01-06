@@ -1,5 +1,5 @@
 import uuhimsyPlugin from "main";
-import {App, PluginSettingTab, Setting, normalizePath } from "obsidian";
+import {App, Notice, PluginSettingTab, Setting, normalizePath } from "obsidian";
 
 export class uuhimsySettingsTab extends PluginSettingTab {
     plugin: uuhimsyPlugin;
@@ -165,10 +165,10 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                     if (existing) {
                         let file = await this.app.vault.adapter.read(normalizePath(`${fileName}`))
                         if(file.includes(`<script src="/_browser_Sources/js/revealSlideControls.js"></script>`)){
-                            console.log('template already includes uuhimsy scripts')
+                            new Notice('template already includes uuhimsy scripts')
                         }
                         else{
-                            console.log('adding scripts')
+                            new Notice('adding UUhimsy scripts to Slides Extended Template')
                             return await this.app.vault.adapter.process(normalizePath(`${fileName}`), (data) =>{
                                 return data.replace('</body>',`    <script src="/_browser_Sources/obs_webSocket_details/websocketDetails.js"></script>
     <script src="/_browser_Sources/obs_webSocket_details/obs-ws.js"></script>
@@ -210,8 +210,3 @@ export class uuhimsySettingsTab extends PluginSettingTab {
     }
 
 }
-
-
-// var websocketIP = this.settings.websocketIP_Text;
-// var websocketPort = this.settings.websocketPort_Text;
-// var websocketPassword = this.settings.websocketPW_Text;
