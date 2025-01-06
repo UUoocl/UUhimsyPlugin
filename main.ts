@@ -135,7 +135,7 @@ export default class uuhimsyPlugin extends Plugin {
 
 					obs.on("error", (err) => {
 						//console.error("Socket error:", err);
-						new Notice(`Socket error:` ${err});
+						new Notice(`Socket error: ${err}`);
 					});
 					//console.log(`ws://${websocketIP}:${websocketPort}`);
 					
