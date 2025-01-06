@@ -284,7 +284,6 @@ export default class uuhimsyPlugin extends Plugin {
 						}
 					}	
 				});
-				//}
 				
 			//create Camera Template Notes
 				let cameraSources = await obs.call("GetSceneItemList", { sceneName: "Input Camera" });
