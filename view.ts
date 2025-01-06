@@ -36,8 +36,7 @@ export class UUhimsyView extends ItemView{
                     lastLeaf?.setEphemeralState(lastLeaf?.getEphemeralState())
                     this.app.workspace.activeEditor?.editor?.replaceSelection(`<!-- slide data-${tag[0]}-entrance="${tag[1]}" -->
 `)
-                
-                    new Notice(`Inserted tag${tag[1]}`)
+                    //new Notice(`Inserted tag ${tag[1]}`)
                     })
                 })
                 .addButton( item => {                
@@ -49,7 +48,7 @@ export class UUhimsyView extends ItemView{
                         lastLeaf?.setEphemeralState(lastLeaf?.getEphemeralState())
                         this.app.workspace.activeEditor?.editor?.replaceSelection(`<!-- slide data-${tag[0]}-exit="${tag[1]}" -->
 `)              
-                        new Notice(`Inserted tag${tag[1]}`)
+                        //new Notice(`Inserted tag ${tag[1]}`)
                     })
                 })
            });
