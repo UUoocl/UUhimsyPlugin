@@ -4,16 +4,16 @@ This is a plugin for Obsidian (https://obsidian.md).
 
 This project integrates Obsidian, OBS, Zoom and automation tools to create whimsical experiences. 
 
-UUhimsy includes a feature to add tags to slides created in the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended) that trigger automation actions.  For example,  change scenes in OBS when transitioning between slides. 
+UUhimsy includes an Obsidian view and commands to add tags to slides created in the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended). Tags trigger automation actions.  For example,  a "scene" tag will change scenes in OBS when transitioning between slides. 
 
 There are many creative possibilties with UUhimsy.     
 
-Start with the [UUhimsy vault](https://github.com/UUoocl/UUhimsy)  
+The [UUhimsy vault](https://github.com/UUoocl/UUhimsy) contains example for getting started.      
 
 This plugin has the following features.
 - A settings page to configure OBS, OBS webSocket Server and an OSC Server
-- Adds a command to open the OBS app with launch parameters.
-- Adds a command to add "Tags" to slides
+- A command to open the OBS app with launch parameters.
+- A view and commands to add "Tags" to slides
 - Creates a websocket connection between OBS and Apple Shortcuts
 - Creates a websocket connection between OBS and ZoomOSC
 - Creates a websocket connection between OBS and UVC-Util CLI
@@ -22,10 +22,10 @@ This plugin has the following features.
 
 ## How to use UUhimsy Plugin
 
-### Connect to OBS 
+### Open to OBS 
 In the UUhimsy settings tab, configure the OBS launch parameters. The settings will be used in the "Open OBS" command.  
 
-![image](https://github.com/user-attachments/assets/10e24711-c2d0-48a7-98c3-cd20de8d9bb4)
+![image](https://github.com/user-attachments/assets/e0ecd765-c5e6-453d-b84f-d6b1b18a007b)
 
 #### **OBS WebSocket Server (WSS) Settings**
   |Settings| Value |
@@ -42,10 +42,7 @@ In the UUhimsy settings tab, configure the OBS launch parameters. The settings w
   |Collection| Enter an OBS Scene Collection name   
   |OBS Debug Port| OBS Browser Sources can be debugged at https://localhost:{Port}. Default Port = 9222  
 
-#### **Open OBS**
-  The UUhimsy Plugin features a command to open OBS.  
-
-  Open the command palette and enter "**Open OBS**"
+After configuring the settings, use the "**UUhimsy: Open OBS**" command to open OBS.
 
 ![image](https://github.com/user-attachments/assets/3352b9c9-1886-4c0e-aaf8-0a0c567474d2)
 
@@ -61,13 +58,16 @@ OBS should launch with the choosen parameters
   {App Name} --args --collection "{Collection}" --remote-debugging-port={Debugging Port} --remote-allow-origins=http://localhost:{Debugging Port} --websocket_port "{WSS Port}" --websocket_password "{WSS Password} --multi"
 ```
 
+### Connect to OBS
+
+Once OBS opens, use the command "**UUhimsy: Start OBS Connection**"  
+
 ### Create Slide Tags
+  Empty note files are stored in the "_slide_Tags" folder that represent tags. 
 
-  UUhimsy uses slide tags to automate actions when a slide transitions.  For example, use a slide to change scenes in OBS when a slide transition starts. 
+  The note file name format is "{Type} - {tagName}"   
 
-  In the UUhimsy settings, click the "Add UUhimsy scripts to Slides Extended Template" button.  
-
-  Slide tags are created with the commands. Open the Command Palette and choose an
+  Open the Command Palette and choose a tag source. 
 
   |Slide tag| Command| Notes|
   |---|---|---|
@@ -76,16 +76,29 @@ OBS should launch with the choosen parameters
   |USB Camera: Pan, Tilt, Zoom |"**Start sending camera PTZ position to OBS**"|The utility application [UVC-Util](https://github.com/jtfrey/uvc-util) is included to retrieve Pan, Tilt, Zoom (PTZ) data from USB PTZ cameras. <br>  MacOS only feature.|
   |ZoomOSC|"Start OSC to OBS Websocket connection"| [ZoomOSC](https://www.liminalet.com/zoomosc) is a client by Zoom with an OSC interface.|
 
-#### **Insert a Slide Tag**
+### **Inserting Tags**
 
-  In a Slides Extended slide, position the cursor above the slide break indicator "---".
-  Open the command palette, and choose "Insert slide exit tag" or "Insert slide entrance tag".  
+  In a Slides Extended slide, position the cursor at the beginning of the slide.  The insertion point on the first slide begins after the front matter. All other slides position the sursor after the slide break indicator, which is "---" by default. 
+  
+  Slide tags are inserted with the UUhimsy view or commands. 
 
   >[!NOTE] Tag Types
   >'Exit' tags run when a slide transition starts 
   >'Entrance' tags run when a slide transition ends
 
+  **Inserting Tags with the UUhimsy View**
+
+![image](https://github.com/user-attachments/assets/e3c3f3a2-248d-431d-a0b4-241a7dfa0579)
+
+  Open the command palette, and choose "Insert slide exit tag" or "Insert slide entrance tag".  
+
 After choosing to insert a tag, then a list of tags appear in the command palette. Select the tag to insert
+
+### **Modifiy the Slides Extended template**
+
+ In the UUhimsy settings, click the "Add UUhimsy scripts to Slides Extended Template" button. 
+
+
 
 ## UUhimsy system
 

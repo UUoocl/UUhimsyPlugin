@@ -1,4 +1,4 @@
-import { Notice, Plugin, normalizePath, DataAdapter,WorkspaceLeaf } from 'obsidian';
+import { Notice, Plugin, normalizePath, DataAdapter,WorkspaceLeaf, Platform } from 'obsidian';
 import { uuhimsySettingsTab } from 'settings';
 import { UUhimsyEntranceSuggest, UUhimsyExitSuggest } from 'suggest';
 import { UUHIMSY_VIEW_TYPE, UUhimsyView } from 'view';
@@ -330,8 +330,7 @@ export default class uuhimsyPlugin extends Plugin {
 				id: 'send-camera-position-to-obs',
 				name: 'Start sending camera PTZ position to OBS',
 				checkCallback: async(checking) => {
-					let isMac = process.platform === 'darwin';
-					if (isMac){
+					if (Platform.isMacOS){
 						if(!checking){
 							let websocketIP = this.settings.websocketIP_Text;
 							let websocketPort = this.settings.websocketPort_Text;
@@ -478,8 +477,7 @@ this.addCommand({
 	id: 'get-shortcuts-tags',
 	name: 'Get Apple Shortcuts tags',
 	checkCallback: async(checking) => {
-		let isMac = process.platform === 'darwin';
-		if (isMac){
+		if (Platform.isMacOS){
 			if(!checking){
 				//This is a Mac computer run the command
 				const util = require('util');
@@ -599,7 +597,7 @@ this.addCommand({
 				//build command string
 				
 				let commandString ="hello"
-				if (process.platform === 'darwin') {
+				if (Platform.isMacOS) {
 					commandString = `open -n -a "${this.settings.obsAppName_Text}"`;
 					commandString += ` --args --collection "${this.settings.obsCollection_Text}"`;
 					commandString += ` --remote-debugging-port=${this.settings.obsDebugPort_Text}`;
@@ -609,7 +607,7 @@ this.addCommand({
 					commandString += ` --multi`;
 					exec(commandString);
 				}
-				if (process.platform === 'win32') {
+				if (Platform.isWin) {
 					const path = require('path');
 					const obsPath = `${this.settings.obsAppPath_Text}${this.settings.obsAppName_Text}`
 					const obsDir = path.dirname(obsPath);
