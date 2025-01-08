@@ -98,8 +98,6 @@ After choosing to insert a tag, then a list of tags appear in the command palett
 
  In the UUhimsy settings, click the "Add UUhimsy scripts to Slides Extended Template" button. 
 
-
-
 ## UUhimsy system
 
 This plugin is a part of the [UUhimsy](https://github.com/UUoocl/UUhimsy) system.

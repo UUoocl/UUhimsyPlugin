@@ -3,15 +3,18 @@ import { uuhimsySettingsTab } from 'settings';
 import { UUhimsyEntranceSuggest, UUhimsyExitSuggest } from 'suggest';
 import { UUHIMSY_VIEW_TYPE, UUhimsyView } from 'view';
 
-//include system command 
-const { execSync } = require('child_process');
+import { execSync } from 'node:child_process';
+import path from 'node:path'; 
+import util from 'util';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+const execAsync = promisify(exec); 
 
-// pathToPlugin contains "my-folder/file" not "//my-folder\"
-
-const { Client, Server, Message } = require("node-osc")
-const OBSWebSocket = require("obs-websocket-js").default;
+import { Client, Server, Message } from 'node-osc';
+import { OBSWebSocket } from 'obs-websocket-js';
 
 interface uuhimsyPluginSettings{
+    uvcUtil_folder: string;
 	websocketIP_Text: string;
 	websocketPort_Text: string;
 	websocketPW_Text: string;
@@ -36,7 +39,8 @@ const DEFAULT_SETTINGS: Partial<uuhimsyPluginSettings> = {
 	obsAppPath_Text: "C:\\\\Program Files\\\\obs-studio\\\\bin\\\\64bit\\\\",
 	obsCollection_Text: "Key_and_Mouse_Visuals_Collection",  
 	obsDebug_Text: "Y",
-	obsDebugPort_Text: "9222"
+	obsDebugPort_Text: "9222",
+	uvcUtil_folder:"_uvc-util"
 };
 
 export default class uuhimsyPlugin extends Plugin {
@@ -68,7 +72,6 @@ export default class uuhimsyPlugin extends Plugin {
 		
 		new Notice("Enabled OSC plugin")	
 		new Notice(this.settings.websocketIP_Text)	
-		new Notice(this.app.vault.configDir)
 			 
 //
 //
@@ -366,15 +369,14 @@ export default class uuhimsyPlugin extends Plugin {
 
 			//https://forum.obsidian.md/t/how-to-get-vault-absolute-path/22965
 			//@ts-ignore
-			const vaultPath = normalizePath(`${this.app.vault.adapter.basePath}/${this.app.vault.configDir}/plugins/UUhimsyPlugin`)
-			const util = require('util');
-			const exec = util.promisify(require('child_process').exec);
+			const uvcUtilPath = normalizePath(`${this.app.vault.adapter.basePath}/${this.settings.uvcUtil_folder}`)
+			
 			let previousPTZ ="";
 			
 			setInterval( async() =>{
 
-				let pt = await getCameraPanTilt(vaultPath, util, exec);
-				let z = await getCameraZoom(vaultPath, util, exec);
+				let pt = await getCameraPanTilt(uvcUtilPath, util, execAsync);
+				let z = await getCameraZoom(uvcUtilPath, util, execAsync);
 				let ptzMessage = `${pt}${z}}`
 				
 				if(ptzMessage != previousPTZ){
@@ -401,10 +403,10 @@ export default class uuhimsyPlugin extends Plugin {
 				}
 			}, 2000);
 
-			async function getCameraPanTilt(vaultPath, util, exec) {				
+			async function getCameraPanTilt(uvcUtilPath, util, exec) {				
 				try {
-				//console.log(vaultPath)
-				const { stdout, stderr } = await exec(`'${vaultPath}/uvc-util' -I 0 -o pan-tilt-abs`);
+				//console.log(uvcUtilPath)
+				const { stdout, stderr } = await exec(`'${uvcUtilPath}/uvc-util' -I 0 -o pan-tilt-abs`);
 				//console.log('stdout:', stdout);
 				//console.log('stderr:', stderr);
 				let ptResult = stdout.toString();
@@ -416,9 +418,9 @@ export default class uuhimsyPlugin extends Plugin {
 				}
 			  }
 
-			async function getCameraZoom(vaultPath, util, exec) {
+			async function getCameraZoom(uvcUtilPath, util, exec) {
 				try {
-				const { stdout, stderr } = await exec(`'${vaultPath}/uvc-util' -I 0 -o zoom-abs`);
+				const { stdout, stderr } = await exec(`'${uvcUtilPath}/uvc-util' -I 0 -o zoom-abs`);
 				//console.log('stdout:', stdout);
 				//console.log('stderr:', stderr);
 				return stdout.replace(/\n/g, "");
@@ -433,7 +435,7 @@ export default class uuhimsyPlugin extends Plugin {
 				//console.log("Message from OBS",event);
 				if (event.event_name === "set-ptz") {
 					//console.log('command',`'shortcuts' run ${event.shortcut_name}`)
-					const stdout =  await exec(`'${vaultPath}/uvc-util' -I 0 -o pan-tilt-abs`);
+					const stdout =  await exec(`'${uvcUtilPath}/uvc-util' -I 0 -o pan-tilt-abs`);
 					//console.log(stdout)
 				}
 			  })
@@ -480,8 +482,6 @@ this.addCommand({
 		if (Platform.isMacOS){
 			if(!checking){
 				//This is a Mac computer run the command
-				const util = require('util');
-				const exec = util.promisify(require('child_process').exec);	
 				const { stdout, stderr } = await exec(`'shortcuts' list`);
 				//let shortcuts =  JSON.stringify(stdout)
 				let shortcuts =  stdout.split('\n')
@@ -592,8 +592,6 @@ this.addCommand({
 			id: 'open-obs',
 			name: 'Open OBS',
 			callback: async () => {
-				const util = require('util');
-				const exec = util.promisify(require('child_process').exec);
 				//build command string
 				
 				let commandString ="hello"
@@ -605,10 +603,9 @@ this.addCommand({
 					commandString += ` --websocket_port "${this.settings.websocketPort_Text}"`;
 					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
 					commandString += ` --multi`;
-					exec(commandString);
+					execAsync(commandString);
 				}
 				if (Platform.isWin) {
-					const path = require('path');
 					const obsPath = `${this.settings.obsAppPath_Text}${this.settings.obsAppName_Text}`
 					const obsDir = path.dirname(obsPath);
 					process.chdir(obsDir)
@@ -621,9 +618,9 @@ this.addCommand({
 					commandString += ` --websocket_password "${this.settings.websocketPW_Text}"`;
 					commandString += ` --multi`;
 		
-					exec(commandString, (error, stdout, stderr) => {
+					execAsync(commandString, (error, stdout, stderr) => {
 					  if (error) {
-						  //console.error(`exec error: ${error}`);
+						  //console.error(`execAsync error: ${error}`);
 						  return;
 					  }
 					  //console.log(`stdout: ${stdout}`);
@@ -702,13 +699,13 @@ this.addCommand({
 
 async openView(){
 	const { workspace } = this.app;
-	this.app.workspace.detachLeavesOfType(UUHIMSY_VIEW_TYPE)	
 	let leaf: WorkspaceLeaf | null = null;
     const leaves = workspace.getLeavesOfType(UUHIMSY_VIEW_TYPE);
 
     if (leaves.length > 0) {
       // A leaf with our view already exists, use that
       leaf = leaves[0];
+	
     } else {
       // Our view could not be found in the workspace, create a new leaf
       // in the right sidebar for it
@@ -721,7 +718,7 @@ async openView(){
   }
 
 	onunload() {
-		this.app.workspace.detachLeavesOfType(UUHIMSY_VIEW_TYPE)
+		//this.app.workspace.detachLeavesOfType(UUHIMSY_VIEW_TYPE)
 		new Notice("Disabled UUhimsy plugin")
 
 	}

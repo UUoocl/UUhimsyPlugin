@@ -1,4 +1,4 @@
-import { ItemView, WorkspaceLeaf, Setting, Notice, Editor, MarkdownView, MarkdownEditView } from "obsidian";
+import { ItemView, WorkspaceLeaf, Setting, Notice, Editor, MarkdownView, MarkdownEditView, IconName } from "obsidian";
 
 export const UUHIMSY_VIEW_TYPE = "uuhimsy-view"
 
@@ -15,11 +15,30 @@ export class UUhimsyView extends ItemView{
         return "UUhimsy Tags";
     }
 
+    getIcon(): IconName {
+        return "wand-sparkles";
+    }
+
     async onOpen() {
         const container = this.containerEl.children[1];
-        container.empty();
-        container.createEl('h4', { text: 'UUhimsy Tags' });
 
+        container.empty();
+        container.createDiv('Header')
+        new Setting(container).setName('UUhimsy Tags')
+        .setHeading()
+        .setDesc('refresh the view after running a "Get tags" command')
+        .addButton((button) =>{
+            button.setButtonText("refresh view")
+            .onClick(() => {this.addTagButtons(tagsContainer)})
+        })
+
+        const tagsContainer = container.createDiv('tags')
+
+        this.addTagButtons(tagsContainer)
+      }
+
+      addTagButtons(container){
+        container.empty()
         const files = this.app.vault.getFolderByPath("_slide_Tags").children;
         files.forEach(file => {
             let tag = file.basename.split(' - ')
@@ -53,7 +72,7 @@ export class UUhimsyView extends ItemView{
                 })
            });
       }
-    
+
       async onClose() {
         // Nothing to clean up.
       }

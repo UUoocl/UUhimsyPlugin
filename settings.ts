@@ -1,5 +1,5 @@
 import uuhimsyPlugin from "main";
-import {App, Notice, PluginSettingTab, Setting, normalizePath } from "obsidian";
+import {App, Notice, Platform, PluginSettingTab, Setting, normalizePath } from "obsidian";
 
 export class uuhimsySettingsTab extends PluginSettingTab {
     plugin: uuhimsyPlugin;
@@ -57,7 +57,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         .setHeading()
         .setDesc("Open OBS with these options.")
         
-        if(process.platform === "darwin"){
+        if(Platform.isMacOS){
             new Setting(containerEl)
             .setName("Name")
             .setDesc("Enter 'OBS' or a custom name")
@@ -70,7 +70,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 });
             }
         
-        if(process.platform === "win32"){
+        if(Platform.isWin){
             new Setting(containerEl)
             .setName("Name")
             .setDesc("Enter 'obs64.exe' or a custom name")
@@ -140,7 +140,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-        .setName("Out going Message PORT")
+        .setName("Outgoing Message PORT")
         .addText((item) => {
             item.setValue(this.plugin.settings.oscOutPort_Text).onChange(
                 (value) => {
@@ -149,7 +149,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                     
                 })
             });
-        
+     
         new Setting(containerEl)
         .setName("Add UUhimsy scripts to Slides Extended Template")
         .setHeading()
@@ -160,7 +160,7 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 .setTooltip("UUhimsy scripts are included when exporting from Slides Extended")
                 .setCta()
                 .onClick(async ()=>{
-                    const fileName = `.obsidian/plugins/slides-extended/template/reveal.html`;
+                    const fileName = `${this.app.vault.configDir}/plugins/slides-extended/template/reveal.html`;
                     const existing = await this.app.vault.adapter.exists(normalizePath(`${fileName}`));
                     if (existing) {
                         let file = await this.app.vault.adapter.read(normalizePath(`${fileName}`))
@@ -186,6 +186,38 @@ export class uuhimsySettingsTab extends PluginSettingTab {
                 //     this.plugin.saveSettings()
                 //  })
         });
+
+        if(Platform.isMacOS){
+            new Setting(containerEl)
+            .setName("UVC-Util")
+            .setHeading()
+            .setDesc(`USB Video Class (UVC) control management utility for Mac OS X`)
+            .addButton((button) =>{
+                button
+                .setButtonText("Learn More")
+                .onClick(() => {window.open("https://github.com/jtfrey/uvc-util")})
+
+            })
+            .addButton((button) =>{
+                button
+                .setCta()
+                .setButtonText("Download")
+                .onClick(() => {window.open("https://github.com/UUoocl/UUhimsy/tree/main/UUhimsy_Demo_Vault/_uvc-util")})
+
+            })
+    
+            new Setting(containerEl)
+            .setName("Path to UVC-util")
+            .setDesc("save 'uvc-util' to a folder in this vault")
+            .addText((item) => {
+                item.setValue(this.plugin.settings.uvcUtil_folder).onChange(
+                    (value) => {
+                        this.plugin.settings.uvcUtil_folder = value;
+                        this.plugin.saveSettings()
+                        
+                    })
+                });
+            }
 
         async function refresh_websocketDetailsJS(obsidian){
             const fileName = `_browser_Sources/obs_webSocket_details/websocketDetails.js`;
