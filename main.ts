@@ -168,7 +168,9 @@ export default class uuhimsyPlugin extends Plugin {
 							requestType: "emit_event",
 							requestData: {
 								event_name: eventName,
-								event_data: { webSocketMessage },
+								event_data: { 
+									webSocketMessage 
+								},
 							},
 						});
 					}
@@ -371,46 +373,197 @@ export default class uuhimsyPlugin extends Plugin {
 			//@ts-ignore
 			const uvcUtilPath = normalizePath(`${this.app.vault.adapter.basePath}/${this.settings.uvcUtil_folder}`)
 			
-			let previousPTZ ="";
+			//Get connected USB PTZ cameras 
+			let ptzCameras = await getPTZdevices(uvcUtilPath);
+			console.log('returned',ptzCameras)
 			
+			//for each camera get the Pan and Tilt min and max
+			const panTiltValues = await getPanTiltMinMax(uvcUtilPath,ptzCameras) 
+			const zoomValues = await getZoomMinMax(uvcUtilPath,ptzCameras) 
+			//add the pan, tilt, and zoom min and max values to the ptzCamera object
+			ptzCameras = ptzCameras.map((item, index) => ({ ...item, ...panTiltValues[index] }));
+			ptzCameras = ptzCameras.map((item, index) => ({ ...item, ...zoomValues[index] }));
+			
+			console.log('returned with min max',ptzCameras)
+			//let pt = await getCameraPanTilt(uvcUtilPath, ptzCameras[0].Index);
+			//send camera details and current value to OBS
+			
+			//for each camera start sending the position values once per second. 
+			const ptzMessage=[];
+			const previousPTZ=[];
 			setInterval( async() =>{
-
-				let pt = await getCameraPanTilt(uvcUtilPath, util, execAsync);
-				let z = await getCameraZoom(uvcUtilPath, util, execAsync);
-				let ptzMessage = `${pt}${z}}`
+				for( let c of ptzCameras ){
+					let pt = await getCameraPanTilt(uvcUtilPath, c.Index);
+					let z = await getCameraZoom(uvcUtilPath,c.Index);
+					ptzMessage[c.Index] = `{"index":${c.Index},"pan":${pt.pan},"tilt":${pt.tilt},"zoom":${z}}`
+					if(ptzMessage[c.Index] != previousPTZ[c.Index]){
+						console.log("c.index",c.Index, pt,z)
+						//send results to OBS
+						previousPTZ[c.Index] = ptzMessage[c.Index]
+						c.pan = pt.pan;
+						c.tilt = pt.tilt;
+						c.zoom = z; 
+						console.log("loop",ptzCameras[c.index])
+						console.log("loop ptz",c)
+						//send results to text source
+						await obs.call("SetInputSettings", {
+							inputName: 'PTZ values',
+							inputSettings: {
+								text: `${JSON.stringify(c)}`,
+							}
+						});
+						
+						//send results to OBS Browser Source
+						obs.call("CallVendorRequest", {
+							vendorName: "obs-browser",
+							requestType: "emit_event",
+							requestData: {
+								event_name: "ptz-message",
+								event_data:  {
+									data: c
+								},
+							},
+						});
+					}
+				}}, 2000);
 				
-				if(ptzMessage != previousPTZ){
-					//send results to OBS
-					previousPTZ = ptzMessage
-					
-					//send results to text source
-					await obs.call("SetInputSettings", {
-						inputName: 'PTZ values',
-						inputSettings: {
-							text: `${ptzMessage}`,
-						}
-					});
-					
-					//send results to OBS Browser Source
-					obs.call("CallVendorRequest", {
-						vendorName: "obs-browser",
-						requestType: "emit_event",
-						requestData: {
-							event_name: "ptz-message",
-							event_data: { ptzMessage },
-						},
-					});
+			async function runExec(command){
+				try{
+					const {stdout, stderr} = await execAsync(command);
+					return stdout ? stdout.toString() : stderr;
+				} catch(e){
+					console.log(e)
+					return e
 				}
-			}, 2000);
+			}
 
-			async function getCameraPanTilt(uvcUtilPath, util, exec) {				
+			async function isPTZ(allDevices){
+				console.log(allDevices)
+				const ptzCameras=[]
+				try{
+					for (let d of allDevices){
+						let deviceControls = await runExec(`'${uvcUtilPath}/uvc-util' -I ${d.Index} -c`);
+						console.log("deviceControls", typeof deviceControls)
+						if(deviceControls.includes("pan-tilt-abs")){ptzCameras.push(d)}
+					}
+					return ptzCameras
+				}catch(e){
+
+				}
+			}
+			
+			async function getPTZdevices(uvcUtilPath) {				
+				try {
+					let cameras =[];
+					const cameraKeys = ["Index","VendorID","LocationID","UVC_Version","DeviceName"];
+					const mergedObject = {};
+					let devices = await runExec(`'${uvcUtilPath}/uvc-util' --list-devices`);
+					
+					let deviceResult = devices;
+					
+					deviceResult = deviceResult.split('\n')
+					
+					//remove CLI formatting
+					deviceResult.splice(0, 3);
+					deviceResult.pop();
+					deviceResult.pop();
+					for( let d of deviceResult){
+						d = d.replace(/  +/g,'|')
+						const cameraValues = d.split('|');
+						
+						const mergedObject = {};
+						
+						for (let i = 0; i < cameraKeys.length; i++) {
+							mergedObject[cameraKeys[i]] = cameraValues[i];
+						}
+						
+						//save camera details in array of objects
+						cameras.push(mergedObject)	
+					}
+					console.log("devices",cameras)
+					const ptzDevices = await isPTZ(cameras)
+					return ptzDevices;
+					
+				} catch (e) {
+					//console.error(e); // should contain code (exit code) and signal (that caused the termination).
+				}
+			}
+			
+			async function getPanTiltMinMax(uvcUtilPath, devices) {
+				let cameras =[];
+				const panTiltObject = {};
+				for(let d of devices){
+					let deviceResult = await runExec(`'${uvcUtilPath}/uvc-util' -I ${d.Index} -S pan-tilt-abs`);
+					deviceResult = deviceResult.split('\n')
+					
+					//remove pan tilt CLI formatting
+					deviceResult.splice(0, 5);
+					deviceResult.pop();
+					deviceResult.pop();
+					deviceResult.pop();
+					deviceResult.pop();
+					let panTiltValues = []
+					for( let v of deviceResult){
+						v = v.replace('pan=','').replace('tilt=','').replace('}','')
+						v = v.split('{')
+						v.shift()	
+						v = v[0].split(',')
+						panTiltValues = panTiltValues.concat(v)
+					}
+					
+					panTiltObject.panMin = panTiltValues[0]
+					panTiltObject.panMax = panTiltValues[2]
+					panTiltObject.tiltMin = panTiltValues[1]
+					panTiltObject.tiltffffghjnMax = panTiltValues[3]
+					panTiltObject.panTiltStep = panTiltValues[4]
+					cameras.push(panTiltObject)
+				}				
+				return cameras;
+			}
+
+			async function getZoomMinMax(uvcUtilPath, devices) {
+				let cameras =[];
+				const zoomObject = {};
+				for(let d of devices){
+					try {
+						let deviceResult = await runExec(`'${uvcUtilPath}/uvc-util' -I ${d.Index} -S zoom-abs`);
+						deviceResult = deviceResult.split('\n')
+						//remove zoom CLI formatting
+						deviceResult.splice(0, 4);
+						deviceResult.pop();
+						deviceResult.pop();
+						deviceResult.pop();
+						deviceResult.pop();
+						let cameraValues = []
+						for( let v of deviceResult){
+							v = v.split(': ')
+							v.shift()	
+							console.log(v)
+							cameraValues = cameraValues.concat(v)
+						}
+						
+						zoomObject.zoomMin = cameraValues[0]
+						zoomObject.zoomMax = cameraValues[1]
+						zoomObject.zoomStep = cameraValues[2]
+						cameras.push(zoomObject)
+					} catch (e) {
+						//console.error(e); // should contain code (exit code) and signal (that caused the termination).
+					}
+				}				
+				return cameras;
+			}
+
+			async function getCameraPanTilt(uvcUtilPath, deviceIndex) {				
 				try {
 				//console.log(uvcUtilPath)
-				const { stdout, stderr } = await exec(`'${uvcUtilPath}/uvc-util' -I 0 -o pan-tilt-abs`);
+				const { stdout, stderr } = await execAsync(`'${uvcUtilPath}/uvc-util' -I ${deviceIndex} -o pan-tilt-abs`);
 				//console.log('stdout:', stdout);
 				//console.log('stderr:', stderr);
 				let ptResult = stdout.toString();
-				ptResult = ptResult.replace(/\n/g,'').replace('pan','"pan"').replace('}',', "zoom": ').replace(/=/g,': ').replace('tilt','"tilt"')
+				ptResult = ptResult.replaceAll('=','":')
+				ptResult = ptResult.replace('{','{"')
+				ptResult = ptResult.replace(',',',"')
+				ptResult = JSON.parse(ptResult)
 				return ptResult;
 				
 				} catch (e) {
@@ -418,12 +571,11 @@ export default class uuhimsyPlugin extends Plugin {
 				}
 			  }
 
-			async function getCameraZoom(uvcUtilPath, util, exec) {
+			async function getCameraZoom(uvcUtilPath, deviceIndex) {
 				try {
-				const { stdout, stderr } = await exec(`'${uvcUtilPath}/uvc-util' -I 0 -o zoom-abs`);
-				//console.log('stdout:', stdout);
-				//console.log('stderr:', stderr);
-				return stdout.replace(/\n/g, "");
+				const { stdout, stderr } = await execAsync(`'${uvcUtilPath}/uvc-util' -I ${deviceIndex} -o zoom-abs`);  
+				let zoomValue = stdout.toString()
+				return zoomValue.replace(/\n/g, "");
 			
 				} catch (e) {
 				  //console.error(e); // should contain code (exit code) and signal (that caused the termination).
