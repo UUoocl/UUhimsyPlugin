@@ -514,7 +514,7 @@ export default class uuhimsyPlugin extends Plugin {
 					panTiltObject.panMin = panTiltValues[0]
 					panTiltObject.panMax = panTiltValues[2]
 					panTiltObject.tiltMin = panTiltValues[1]
-					panTiltObject.tiltffffghjnMax = panTiltValues[3]
+					panTiltObject.tiltMax = panTiltValues[3]
 					panTiltObject.panTiltStep = panTiltValues[4]
 					cameras.push(panTiltObject)
 				}				
