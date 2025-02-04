@@ -2,9 +2,9 @@
 
 This is a plugin for Obsidian (https://obsidian.md).
 
-This project integrates Obsidian, OBS, Zoom and automation tools to create whimsical experiences. 
+This plugin integrates Obsidian, OBS, Zoom and automation tools to create whimsical experiences. 
 
-UUhimsy includes an Obsidian view and commands to add tags to slides created in the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended). Tags trigger automation actions.  For example,  a "scene" tag will change scenes in OBS when transitioning between slides. 
+UUhimsy plugin includes an Obsidian view and commands to add tags to slides created in the [Slides Extended Plugin](https://github.com/ebullient/obsidian-slides-extended). Tags trigger automation actions.  For example,  a "scene" tag will change scenes in OBS when transitioning between slides. 
 
 There are many creative possibilties with UUhimsy.     
 
@@ -14,9 +14,10 @@ This plugin has the following features.
 - A settings page to configure OBS, OBS webSocket Server and an OSC Server
 - A command to open the OBS app with launch parameters.
 - A view and commands to add "Tags" to slides
-- Creates a websocket connection between OBS and Apple Shortcuts
-- Creates a websocket connection between OBS and ZoomOSC
-- Creates a websocket connection between OBS and UVC-Util CLI
+- Commands to creates a websocket connection between 
+  - OBS and Apple Shortcuts
+  - OBS and ZoomOSC
+  - OBS and UVC-Util CLI
 
 ![image](https://github.com/user-attachments/assets/4789585c-021e-4a50-ac6d-ee1c19f1913f)
 
